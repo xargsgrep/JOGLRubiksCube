@@ -11,6 +11,8 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SMOOTH;
 import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_MODELVIEW;
 import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_PROJECTION;
 
+import java.util.Random;
+
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
@@ -40,9 +42,9 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	private static final float ZERO_F = 0.0f;
 	private static final float ONE_F  = 1.0f;
 	private static final float TWO_F  = 2.0f;
-	private static final float CUBLET_GAP_F  = 0.1f; // gap between cubelets
+	private static final float CUBELET_GAP_F = 0.1f; // gap between cubelets
 	
-	private final float CUBELET_TRANSLATION_UNIT = TWO_F + CUBLET_GAP_F;
+	private final float CUBELET_TRANSLATION_UNIT = TWO_F + CUBELET_GAP_F;
 	
 	private static final float DEFAULT_CAMERA_ANGLE_X = 45.0f;
 	private static final float DEFAULT_CAMERA_ANGLE_Y = 45.0f;
@@ -58,35 +60,36 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	private static final int LEFT_KEY  = 37; // rotate around x -
 	private static final int UP_KEY    = 38; // rotate around x +
 	private static final int RIGHT_KEY = 39; // rotate around y -
-											 // +shift rotate around z -
+                                             // +shift rotate around z -
 	private static final int DOWN_KEY  = 40; // rotate around y +
-											 // +shift rotate around z +
+                                             // +shift rotate around z +
 	private static final int R_KEY     = 82; // reset camera
-										 	 // +shift reset camera and cube state
+                                             // +shift reset camera and cube state
+	private static final int J_KEY     = 74; // scramble
 	
 	// cube column controls
 	private static final int Q_KEY = 81; // rotate right around x +
-										 // +shift rotate around x -
+                                         // +shift rotate around x -
 	private static final int W_KEY = 87; // rotate middle around x +
-										 // +shift rotate around x -
+                                         // +shift rotate around x -
 	private static final int E_KEY = 69; // rotate left around x +
-										 // +shift rotate around x -
+                                         // +shift rotate around x -
 	
 	// cube row controls
 	private static final int A_KEY = 65; // rotate top around y +
-										 // +shift rotate around y -
+                                         // +shift rotate around y -
 	private static final int S_KEY = 83; // rotate middle around y +
-										 // +shift rotate around y -
+                                         // +shift rotate around y -
 	private static final int D_KEY = 68; // rotate bottom around y +
-										 // +shift rotate around y -
+                                         // +shift rotate around y -
 	
 	// cube face controls
 	private static final int Z_KEY = 90; // rotate front around z +
-										 // +shift rotate around z -
+                                         // +shift rotate around z -
 	private static final int X_KEY = 88; // rotate middle around z +
-										 // +shift rotate around z -
+                                         // +shift rotate around z -
 	private static final int C_KEY = 67; // rotate rear around z +
-										 // +shift rotate around z -
+                                         // +shift rotate around z -
 	
 	// bits for specifying faces on the cubelets
 	private final int FACE_CUBELET_FRONT  = 1;
@@ -112,6 +115,7 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	private float cameraAngleX = DEFAULT_CAMERA_ANGLE_X;
 	private float cameraAngleY = DEFAULT_CAMERA_ANGLE_Y;
 	private float cameraAngleZ = ZERO_F;
+	private float zoom         = DEFAULT_ZOOM;
 	
 	private float columnRightAngleX  = ZERO_F;
 	private float columnMiddleAngleX = ZERO_F;
@@ -128,12 +132,11 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	private int rotatingSection = 0;
 	private float angularVelocity = 5.0f;
 	
-	private float zoom = DEFAULT_ZOOM;
-	
 	private int mouseX = 0;
 	private int mouseY = 0;
 	
 	private Cubelet[][][] cubelets;
+	private boolean scramble = false;
 	
 	private enum Color {
 		WHITE  { @Override public void glApply(GL2 gl) { gl.glColor3f(ONE_F, ONE_F, ONE_F);    } },
@@ -219,17 +222,19 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 			for (int y=0; y<3; y++) {
 				for (int z=0; z<3; z++) {
 					gl.glPushMatrix();
-						gl.glRotatef((x == 0) ? columnLeftAngleX : ((x == 1) ? columnMiddleAngleX : columnRightAngleX), ONE_F, ZERO_F, ZERO_F);
-						gl.glRotatef((y == 0) ? rowBottomAngleY  : ((y == 1) ? rowMiddleAngleY    : rowTopAngleY),      ZERO_F, ONE_F, ZERO_F);
-						gl.glRotatef((z == 0) ? faceFrontAngleZ  : ((z == 1) ? faceMiddleAngleZ   : faceRearAngleZ),    ZERO_F, ZERO_F, ONE_F);
-						// center the cube at (0,0,0)
-						gl.glTranslatef((x-1)*CUBELET_TRANSLATION_UNIT, (y-1)*CUBELET_TRANSLATION_UNIT, (z-1)*-CUBELET_TRANSLATION_UNIT);
+					
+					gl.glRotatef((x == 0) ? columnLeftAngleX : ((x == 1) ? columnMiddleAngleX : columnRightAngleX), ONE_F, ZERO_F, ZERO_F);
+					gl.glRotatef((y == 0) ? rowBottomAngleY  : ((y == 1) ? rowMiddleAngleY    : rowTopAngleY),      ZERO_F, ONE_F, ZERO_F);
+					gl.glRotatef((z == 0) ? faceFrontAngleZ  : ((z == 1) ? faceMiddleAngleZ   : faceRearAngleZ),    ZERO_F, ZERO_F, ONE_F);
+					// center the cube at (0,0,0)
+					gl.glTranslatef((x-1)*CUBELET_TRANSLATION_UNIT, (y-1)*CUBELET_TRANSLATION_UNIT, -(z-1)*CUBELET_TRANSLATION_UNIT);
+					
+					int visibleFaces = (x == 0) ? FACE_CUBELET_LEFT   : ((x == 2) ? FACE_CUBELET_RIGHT : 0);
+					visibleFaces    |= (y == 0) ? FACE_CUBELET_BOTTOM : ((y == 2) ? FACE_CUBELET_TOP   : 0);
+					visibleFaces    |= (z == 0) ? FACE_CUBELET_FRONT  : ((z == 2) ? FACE_CUBELET_REAR  : 0);
+					
+					drawCubelet(gl, visibleFaces, cubelets[x][y][z]);
 						
-						int visibleFaces = (x == 0) ? FACE_CUBELET_LEFT   : ((x == 2) ? FACE_CUBELET_RIGHT : 0);
-						visibleFaces    |= (y == 0) ? FACE_CUBELET_BOTTOM : ((y == 2) ? FACE_CUBELET_TOP   : 0);
-						visibleFaces    |= (z == 0) ? FACE_CUBELET_FRONT  : ((z == 2) ? FACE_CUBELET_REAR  : 0);
-						
-						drawCubelet(gl, visibleFaces, cubelets[x][y][z]);
 					gl.glPopMatrix();
 				}
 			}
@@ -291,6 +296,12 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	}
 	
 	private void updateRotationAngles() {
+		if (scramble && rotatingSection == 0) {
+			Random random = new Random();
+			rotatingSection |= new Double(Math.pow(2, random.nextInt(9))).intValue();
+			angularVelocity *= (Math.random() < 0.5) ? -1 : 1;
+		}
+		
 		if ((rotatingSection & SECTION_COLUMN_LEFT) == SECTION_COLUMN_LEFT) {
 			columnLeftAngleX += angularVelocity;
 			if (columnLeftAngleX % SECTION_ROTATE_STEP_DEGREES == 0) {
@@ -364,7 +375,7 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 				faceRearAngleZ = 0;
 				swapColorsZRotation(2);
 			}
-		}
+		}	
 	}
 	
 	private void swapColorsXRotation(int x) {
@@ -492,6 +503,9 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
 				}
 				break;
+			case J_KEY:
+				scramble = !scramble;
+				break;
 			case R_KEY:
 				cameraAngleX = DEFAULT_CAMERA_ANGLE_X;
 				cameraAngleY = DEFAULT_CAMERA_ANGLE_Y;
@@ -593,7 +607,7 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 		window.setSize(CANVAS_WIDTH, CANVAS_HEIGHT);
 		window.setTitle(TITLE);
 		window.setVisible(true);
-		animator.start();
+		animator.start();	
 	}
 	
 }
