@@ -1,3 +1,7 @@
+/*
+ * Ahsan Rabbani <ahsan@xargsgrep.com>
+ */
+
 package com.xargsgrep;
 
 import static javax.media.opengl.GL.GL_COLOR_BUFFER_BIT;
@@ -56,41 +60,6 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	private static final int MIN_ZOOM = -40;
 	private static final int MAX_ZOOM = -10;
 	
-	// camera controls
-	private static final int LEFT_KEY  = 37; // rotate around x -
-	private static final int UP_KEY    = 38; // rotate around x +
-	private static final int RIGHT_KEY = 39; // rotate around y -
-                                             // +shift rotate around z -
-	private static final int DOWN_KEY  = 40; // rotate around y +
-                                             // +shift rotate around z +
-	private static final int R_KEY     = 82; // reset camera
-                                             // +shift reset camera and cube state
-	private static final int J_KEY     = 74; // scramble
-	
-	// cube column controls
-	private static final int Q_KEY = 81; // rotate right around x +
-                                         // +shift rotate around x -
-	private static final int W_KEY = 87; // rotate middle around x +
-                                         // +shift rotate around x -
-	private static final int E_KEY = 69; // rotate left around x +
-                                         // +shift rotate around x -
-	
-	// cube row controls
-	private static final int A_KEY = 65; // rotate top around y +
-                                         // +shift rotate around y -
-	private static final int S_KEY = 83; // rotate middle around y +
-                                         // +shift rotate around y -
-	private static final int D_KEY = 68; // rotate bottom around y +
-                                         // +shift rotate around y -
-	
-	// cube face controls
-	private static final int Z_KEY = 90; // rotate front around z +
-                                         // +shift rotate around z -
-	private static final int X_KEY = 88; // rotate middle around z +
-                                         // +shift rotate around z -
-	private static final int C_KEY = 67; // rotate rear around z +
-                                         // +shift rotate around z -
-	
 	// bits for specifying faces on the cubelets
 	private final int FACE_CUBELET_FRONT  = 1;
 	private final int FACE_CUBELET_REAR   = 2;
@@ -129,8 +98,8 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	private float faceMiddleAngleZ = ZERO_F;
 	private float faceRearAngleZ   = ZERO_F;
 	
-	private int rotatingSection = 0;
-	private float angularVelocity = 5.0f;
+	private int rotatingSection = 0; // the section that is rotation
+	private float angularVelocity = 5.0f; // speed and direction of rotating sections
 	
 	private int mouseX = 0;
 	private int mouseY = 0;
@@ -435,78 +404,78 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	@Override
 	public void keyPressed(KeyEvent e) {
 		switch (e.getKeyCode()) {
-			case UP_KEY:
+			case KeyEvent.VK_UP:
 				cameraAngleX -= CAMERA_ROTATE_STEP_DEGREES;
 				break;
-			case DOWN_KEY:
+			case KeyEvent.VK_DOWN:
 				cameraAngleX += CAMERA_ROTATE_STEP_DEGREES;
 				break;
-			case LEFT_KEY:
+			case KeyEvent.VK_LEFT:
 				if (e.isShiftDown()) cameraAngleZ += CAMERA_ROTATE_STEP_DEGREES;
 				else cameraAngleY -= CAMERA_ROTATE_STEP_DEGREES;
 				break;
-			case RIGHT_KEY:
+			case KeyEvent.VK_RIGHT:
 				if (e.isShiftDown()) cameraAngleZ -= CAMERA_ROTATE_STEP_DEGREES;
 				else cameraAngleY += CAMERA_ROTATE_STEP_DEGREES;
 				break;
-			case Q_KEY:
+			case KeyEvent.VK_Q:
 				if (rotatingSection == 0) {
 					rotatingSection |= SECTION_COLUMN_LEFT;
 					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
 				}
 				break;
-			case W_KEY:
+			case KeyEvent.VK_W:
 				if (rotatingSection == 0) {
 					rotatingSection |= SECTION_COLUMN_MIDDLE;
 					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
 				}
 				break;
-			case E_KEY:
+			case KeyEvent.VK_E:
 				if (rotatingSection == 0) {
 					rotatingSection |= SECTION_COLUMN_RIGHT;
 					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
 				}
 				break;
-			case A_KEY:
+			case KeyEvent.VK_A:
 				if (rotatingSection == 0) {
 					rotatingSection |= SECTION_ROW_TOP;
 					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
 				}
 				break;
-			case S_KEY:
+			case KeyEvent.VK_S:
 				if (rotatingSection == 0) {
 					rotatingSection |= SECTION_ROW_MIDDLE;
 					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
 				}
 				break;
-			case D_KEY:
+			case KeyEvent.VK_D:
 				if (rotatingSection == 0) {
 					rotatingSection |= SECTION_ROW_BOTTOM;
 					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
 				}
 				break;
-			case Z_KEY:
+			case KeyEvent.VK_Z:
 				if (rotatingSection == 0) {
 					rotatingSection |= SECTION_FACE_FRONT;
 					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
 				}
 				break;
-			case X_KEY:
+			case KeyEvent.VK_X:
 				if (rotatingSection == 0) {
 					rotatingSection |= SECTION_FACE_MIDDLE;
 					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
 				}
 				break;
-			case C_KEY:
+			case KeyEvent.VK_C:
 				if (rotatingSection == 0) {
 					rotatingSection |= SECTION_FACE_REAR;
 					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
 				}
 				break;
-			case J_KEY:
+			case KeyEvent.VK_J:
 				scramble = !scramble;
 				break;
-			case R_KEY:
+			case KeyEvent.VK_R:
 				cameraAngleX = DEFAULT_CAMERA_ANGLE_X;
 				cameraAngleY = DEFAULT_CAMERA_ANGLE_Y;
 				cameraAngleZ = ZERO_F;
