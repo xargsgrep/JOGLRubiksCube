@@ -56,7 +56,7 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	private static final int SECTION_ROTATE_STEP_DEGREES = 90;
 	private static final int CAMERA_ROTATE_STEP_DEGREES  = 5;
 	
-	private static final int MIN_ZOOM = -40;
+	private static final int MIN_ZOOM = -80;
 	private static final int MAX_ZOOM = -10;
 	
 	// bits for specifying faces on the cubelets
@@ -127,7 +127,6 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 		}
 	}
 
-	// TODO: fix rotation animation for even cube sizes
 	public JOGLRubiksCube(int size) {
 		this.cubeSize = size;
 		this.cubelets = new Cubelet[cubeSize][cubeSize][cubeSize];
@@ -192,7 +191,7 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 					gl.glRotatef(faceAnglesZ[z], ZERO_F, ZERO_F, ONE_F);
 					
 					// internal representation of cube has (0,0,0) at the bottom-left-front so we need to center it
-					float t = lastIdx/2;
+					float t = (float) lastIdx/2;
 					gl.glTranslatef((x-t)*CUBELET_TRANSLATION_FACTOR, (y-t)*CUBELET_TRANSLATION_FACTOR, -(z-t)*CUBELET_TRANSLATION_FACTOR);
 					
 					int visibleFaces = (x == 0) ? FACE_CUBELET_LEFT   : ((x == lastIdx) ? FACE_CUBELET_RIGHT : 0);
