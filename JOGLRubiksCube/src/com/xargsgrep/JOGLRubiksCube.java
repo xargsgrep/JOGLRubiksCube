@@ -48,7 +48,7 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	private static final float TWO_F  = 2.0f;
 	private static final float CUBELET_GAP_F = 0.1f; // gap between cubelets
 	
-	private final float CUBELET_TRANSLATION_UNIT = TWO_F + CUBELET_GAP_F;
+	private final float CUBELET_TRANSLATION_FACTOR = TWO_F + CUBELET_GAP_F;
 	
 	private static final float DEFAULT_CAMERA_ANGLE_X = 45.0f;
 	private static final float DEFAULT_CAMERA_ANGLE_Y = 45.0f;
@@ -193,7 +193,8 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 					gl.glRotatef(faceAnglesZ[z], ZERO_F, ZERO_F, ONE_F);
 					
 					// internal representation of cube has (0,0,0) at the bottom-left-front so we need to center it
-					gl.glTranslatef((x-1)*CUBELET_TRANSLATION_UNIT, (y-1)*CUBELET_TRANSLATION_UNIT, -(z-1)*CUBELET_TRANSLATION_UNIT);
+					float t = (cubeUnits-1)/2;
+					gl.glTranslatef((x-t)*CUBELET_TRANSLATION_FACTOR, (y-t)*CUBELET_TRANSLATION_FACTOR, -(z-t)*CUBELET_TRANSLATION_FACTOR);
 					
 					int visibleFaces = (x == 0) ? FACE_CUBELET_LEFT   : ((x == cubeUnits-1) ? FACE_CUBELET_RIGHT : 0);
 					visibleFaces    |= (y == 0) ? FACE_CUBELET_BOTTOM : ((y == cubeUnits-1) ? FACE_CUBELET_TOP   : 0);
