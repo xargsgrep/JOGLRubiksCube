@@ -86,25 +86,18 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	private float cameraAngleZ = ZERO_F;
 	private float zoom         = DEFAULT_ZOOM;
 	
-	private float columnRightAngleX  = ZERO_F;
-	private float columnMiddleAngleX = ZERO_F;
-	private float columnLeftAngleX   = ZERO_F;
+	private float[] columnAnglesX;
+	private float[] rowAnglesY;
+	private float[] faceAnglesZ;
 	
-	private float rowTopAngleY    = ZERO_F;
-	private float rowMiddleAngleY = ZERO_F;
-	private float rowBottomAngleY = ZERO_F;
-
-	private float faceFrontAngleZ  = ZERO_F;
-	private float faceMiddleAngleZ = ZERO_F;
-	private float faceRearAngleZ   = ZERO_F;
-	
-	private int rotatingSection = 0; // the section that is rotation
+	private int rotatingSection = 0;
 	private float angularVelocity = 5.0f; // speed and direction of rotating sections
 	
 	private int mouseX = 0;
 	private int mouseY = 0;
 	
 	private Cubelet[][][] cubelets;
+	private int cubeUnits = 3;
 	private boolean scramble = false;
 	
 	private enum Color {
@@ -139,7 +132,10 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	}
 	
 	public JOGLRubiksCube() {
-		cubelets = new Cubelet[3][3][3];
+		cubelets = new Cubelet[cubeUnits][cubeUnits][cubeUnits];
+		columnAnglesX = new float[cubeUnits];
+		rowAnglesY = new float[cubeUnits];
+		faceAnglesZ = new float[cubeUnits];
 		resetCubeState();
 	}
 	
@@ -174,10 +170,10 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	@Override
 	public void display(GLAutoDrawable drawable) {
 		updateRotationAngles();
-		drawCube(drawable.getGL().getGL2());
+		drawCompositeCube(drawable.getGL().getGL2());
 	}
 	
-	private void drawCube(GL2 gl) {
+	private void drawCompositeCube(GL2 gl) {
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		gl.glLoadIdentity();
 		
@@ -187,20 +183,21 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 		gl.glRotatef(cameraAngleY, ZERO_F, ONE_F, ZERO_F);
 		gl.glRotatef(cameraAngleZ, ZERO_F, ZERO_F, ONE_F);
 		
-		for (int x=0; x<3; x++) {
-			for (int y=0; y<3; y++) {
-				for (int z=0; z<3; z++) {
+		for (int x=0; x<cubeUnits; x++) {
+			for (int y=0; y<cubeUnits; y++) {
+				for (int z=0; z<cubeUnits; z++) {
 					gl.glPushMatrix();
 					
-					gl.glRotatef((x == 0) ? columnLeftAngleX : ((x == 1) ? columnMiddleAngleX : columnRightAngleX), ONE_F, ZERO_F, ZERO_F);
-					gl.glRotatef((y == 0) ? rowBottomAngleY  : ((y == 1) ? rowMiddleAngleY    : rowTopAngleY),      ZERO_F, ONE_F, ZERO_F);
-					gl.glRotatef((z == 0) ? faceFrontAngleZ  : ((z == 1) ? faceMiddleAngleZ   : faceRearAngleZ),    ZERO_F, ZERO_F, ONE_F);
-					// center the cube at (0,0,0)
+					gl.glRotatef(columnAnglesX[x], ONE_F, ZERO_F, ZERO_F);
+					gl.glRotatef(rowAnglesY[y], ZERO_F, ONE_F, ZERO_F);
+					gl.glRotatef(faceAnglesZ[z], ZERO_F, ZERO_F, ONE_F);
+					
+					// internal representation of cube has (0,0,0) at the bottom-left-front so we need to center it
 					gl.glTranslatef((x-1)*CUBELET_TRANSLATION_UNIT, (y-1)*CUBELET_TRANSLATION_UNIT, -(z-1)*CUBELET_TRANSLATION_UNIT);
 					
-					int visibleFaces = (x == 0) ? FACE_CUBELET_LEFT   : ((x == 2) ? FACE_CUBELET_RIGHT : 0);
-					visibleFaces    |= (y == 0) ? FACE_CUBELET_BOTTOM : ((y == 2) ? FACE_CUBELET_TOP   : 0);
-					visibleFaces    |= (z == 0) ? FACE_CUBELET_FRONT  : ((z == 2) ? FACE_CUBELET_REAR  : 0);
+					int visibleFaces = (x == 0) ? FACE_CUBELET_LEFT   : ((x == cubeUnits-1) ? FACE_CUBELET_RIGHT : 0);
+					visibleFaces    |= (y == 0) ? FACE_CUBELET_BOTTOM : ((y == cubeUnits-1) ? FACE_CUBELET_TOP   : 0);
+					visibleFaces    |= (z == 0) ? FACE_CUBELET_FRONT  : ((z == cubeUnits-1) ? FACE_CUBELET_REAR  : 0);
 					
 					drawCubelet(gl, visibleFaces, cubelets[x][y][z]);
 						
@@ -265,83 +262,82 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	}
 	
 	private void updateRotationAngles() {
-		if (scramble && rotatingSection == 0) {
+		if (scramble) {
 			Random random = new Random();
-			rotatingSection |= new Double(Math.pow(2, random.nextInt(9))).intValue();
-			angularVelocity *= (Math.random() < 0.5) ? -1 : 1;
+			rotateSection(new Double(Math.pow(2, random.nextInt(9))).intValue(), (Math.random() < 0.5));
 		}
 		
 		if ((rotatingSection & SECTION_COLUMN_LEFT) == SECTION_COLUMN_LEFT) {
-			columnLeftAngleX += angularVelocity;
-			if (columnLeftAngleX % SECTION_ROTATE_STEP_DEGREES == 0) {
+			columnAnglesX[0] += angularVelocity;
+			if (columnAnglesX[0] % SECTION_ROTATE_STEP_DEGREES == 0) {
 				rotatingSection = 0;
-				columnLeftAngleX = 0;
+				columnAnglesX[0] = 0;
 				swapColorsXRotation(0);
 			}
 		}
 		else if ((rotatingSection & SECTION_COLUMN_MIDDLE) == SECTION_COLUMN_MIDDLE) {
-			columnMiddleAngleX += angularVelocity;
-			if (columnMiddleAngleX % SECTION_ROTATE_STEP_DEGREES == 0) {
+			columnAnglesX[1] += angularVelocity;
+			if (columnAnglesX[1] % SECTION_ROTATE_STEP_DEGREES == 0) {
 				rotatingSection = 0;
-				columnMiddleAngleX = 0;
+				columnAnglesX[1] = 0;
 				swapColorsXRotation(1);
 			}
 		}
 		else if ((rotatingSection & SECTION_COLUMN_RIGHT) == SECTION_COLUMN_RIGHT) {
-			columnRightAngleX += angularVelocity;
-			if (columnRightAngleX % SECTION_ROTATE_STEP_DEGREES == 0) {
+			columnAnglesX[2] += angularVelocity;
+			if (columnAnglesX[2] % SECTION_ROTATE_STEP_DEGREES == 0) {
 				rotatingSection = 0;
-				columnRightAngleX = 0;	
+				columnAnglesX[2] = 0;	
 				swapColorsXRotation(2);
 			}
 		}
 		
 		else if ((rotatingSection & SECTION_ROW_BOTTOM) == SECTION_ROW_BOTTOM) {
-			rowBottomAngleY += angularVelocity;
-			if (rowBottomAngleY % SECTION_ROTATE_STEP_DEGREES == 0) {
+			rowAnglesY[0] += angularVelocity;
+			if (rowAnglesY[0] % SECTION_ROTATE_STEP_DEGREES == 0) {
 				rotatingSection = 0;
-				rowBottomAngleY = 0;
+				rowAnglesY[0] = 0;
 				swapColorsYRotation(0);
 			}
 		}
 		else if ((rotatingSection & SECTION_ROW_MIDDLE) == SECTION_ROW_MIDDLE) {
-			rowMiddleAngleY += angularVelocity;
-			if (rowMiddleAngleY % SECTION_ROTATE_STEP_DEGREES == 0) {
+			rowAnglesY[1] += angularVelocity;
+			if (rowAnglesY[1] % SECTION_ROTATE_STEP_DEGREES == 0) {
 				rotatingSection = 0;
-				rowMiddleAngleY = 0;
+				rowAnglesY[1] = 0;
 				swapColorsYRotation(1);
 			}
 		}
 		
 		else if ((rotatingSection & SECTION_ROW_TOP) == SECTION_ROW_TOP) {
-			rowTopAngleY += angularVelocity;
-			if (rowTopAngleY % SECTION_ROTATE_STEP_DEGREES == 0) {
+			rowAnglesY[2] += angularVelocity;
+			if (rowAnglesY[2] % SECTION_ROTATE_STEP_DEGREES == 0) {
 				rotatingSection = 0;
-				rowTopAngleY = 0;
+				rowAnglesY[2] = 0;
 				swapColorsYRotation(2);
 			}
 		}
 		else if ((rotatingSection & SECTION_FACE_FRONT) == SECTION_FACE_FRONT) {
-			faceFrontAngleZ += angularVelocity;
-			if (faceFrontAngleZ % SECTION_ROTATE_STEP_DEGREES == 0) {
+			faceAnglesZ[0] += angularVelocity;
+			if (faceAnglesZ[0] % SECTION_ROTATE_STEP_DEGREES == 0) {
 				rotatingSection = 0;
-				faceFrontAngleZ = 0;
+				faceAnglesZ[0] = 0;
 				swapColorsZRotation(0);
 			}
 		}
 		else if ((rotatingSection & SECTION_FACE_MIDDLE) == SECTION_FACE_MIDDLE) {
-			faceMiddleAngleZ += angularVelocity;
-			if (faceMiddleAngleZ % SECTION_ROTATE_STEP_DEGREES == 0) {
+			faceAnglesZ[1] += angularVelocity;
+			if (faceAnglesZ[1] % SECTION_ROTATE_STEP_DEGREES == 0) {
 				rotatingSection = 0;
-				faceMiddleAngleZ = 0;
+				faceAnglesZ[1] = 0;
 				swapColorsZRotation(1);
 			}
 		}
 		else if ((rotatingSection & SECTION_FACE_REAR) == SECTION_FACE_REAR) {
-			faceRearAngleZ += angularVelocity;
-			if (faceRearAngleZ % SECTION_ROTATE_STEP_DEGREES == 0) {
+			faceAnglesZ[2] += angularVelocity;
+			if (faceAnglesZ[2] % SECTION_ROTATE_STEP_DEGREES == 0) {
 				rotatingSection = 0;
-				faceRearAngleZ = 0;
+				faceAnglesZ[2] = 0;
 				swapColorsZRotation(2);
 			}
 		}	
@@ -349,14 +345,15 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	
 	private void swapColorsXRotation(int x) {
 		Cubelet[][][] copy = copyCubeState(cubelets);
-		for (int i=0, ir=2; i<3; i++, ir--) {
-			copy[x][2][i].topColor    = (angularVelocity > 0) ? cubelets[x][ir][2].rearColor  : cubelets[x][i][0].frontColor;
-			copy[x][0][i].bottomColor = (angularVelocity > 0) ? cubelets[x][ir][0].frontColor : cubelets[x][i][2].rearColor;
-			copy[x][i][0].frontColor  = (angularVelocity > 0) ? cubelets[x][2][i].topColor    : cubelets[x][0][ir].bottomColor;
-			copy[x][i][2].rearColor   = (angularVelocity > 0) ? cubelets[x][0][i].bottomColor : cubelets[x][2][ir].topColor;
+		int j = cubeUnits-1;
+		for (int i=0, ir=cubeUnits-1; i<cubeUnits; i++, ir--) {
+			copy[x][j][i].topColor    = (angularVelocity > 0) ? cubelets[x][ir][j].rearColor  : cubelets[x][i][0].frontColor;
+			copy[x][0][i].bottomColor = (angularVelocity > 0) ? cubelets[x][ir][0].frontColor : cubelets[x][i][j].rearColor;
+			copy[x][i][0].frontColor  = (angularVelocity > 0) ? cubelets[x][j][i].topColor    : cubelets[x][0][ir].bottomColor;
+			copy[x][i][j].rearColor   = (angularVelocity > 0) ? cubelets[x][0][i].bottomColor : cubelets[x][j][ir].topColor;
 		}
-		for (int y=0, yr=2; y<3; y++, yr--) {
-			for (int z=0, zr=2; z<3; z++, zr--) {
+		for (int y=0, yr=cubeUnits-1; y<cubeUnits; y++, yr--) {
+			for (int z=0, zr=cubeUnits-1; z<cubeUnits; z++, zr--) {
 				copy[x][y][z].leftColor  = (angularVelocity > 0) ? cubelets[x][zr][y].leftColor  : cubelets[x][z][yr].leftColor;
 				copy[x][y][z].rightColor = (angularVelocity > 0) ? cubelets[x][zr][y].rightColor : cubelets[x][z][yr].rightColor;
 			}
@@ -366,14 +363,15 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	
 	private void swapColorsYRotation(int y) {	
 		Cubelet[][][] copy = copyCubeState(cubelets);
-		for (int i=0, ir=2; i<3; i++, ir--) {
-			copy[0][y][i].leftColor  = (angularVelocity > 0) ? cubelets[i][y][2].rearColor   : cubelets[ir][y][0].frontColor;
-			copy[2][y][i].rightColor = (angularVelocity > 0) ? cubelets[i][y][0].frontColor  : cubelets[ir][y][2].rearColor;
-			copy[i][y][0].frontColor = (angularVelocity > 0) ? cubelets[0][y][ir].leftColor  : cubelets[2][y][i].rightColor;
-			copy[i][y][2].rearColor  = (angularVelocity > 0) ? cubelets[2][y][ir].rightColor : cubelets[0][y][i].leftColor;
+		int j = cubeUnits-1;
+		for (int i=0, ir=cubeUnits-1; i<cubeUnits; i++, ir--) {
+			copy[0][y][i].leftColor  = (angularVelocity > 0) ? cubelets[i][y][j].rearColor   : cubelets[ir][y][0].frontColor;
+			copy[j][y][i].rightColor = (angularVelocity > 0) ? cubelets[i][y][0].frontColor  : cubelets[ir][y][j].rearColor;
+			copy[i][y][0].frontColor = (angularVelocity > 0) ? cubelets[0][y][ir].leftColor  : cubelets[j][y][i].rightColor;
+			copy[i][y][j].rearColor  = (angularVelocity > 0) ? cubelets[j][y][ir].rightColor : cubelets[0][y][i].leftColor;
 		}
-		for (int x=0, xr=2; x<3; x++, xr--) {
-			for (int z=0, zr=2; z<3; z++, zr--) {
+		for (int x=0, xr=cubeUnits-1; x<cubeUnits; x++, xr--) {
+			for (int z=0, zr=cubeUnits-1; z<cubeUnits; z++, zr--) {
 				copy[x][y][z].topColor    = (angularVelocity > 0) ? cubelets[z][y][xr].topColor    : cubelets[zr][y][x].topColor;
 				copy[x][y][z].bottomColor = (angularVelocity > 0) ? cubelets[z][y][xr].bottomColor : cubelets[zr][y][x].bottomColor;
 			}
@@ -383,14 +381,15 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 	
 	private void swapColorsZRotation(int z) {
 		Cubelet[][][] copy = copyCubeState(cubelets);
-		for (int i=0, ir=2; i<3; i++, ir--) {
-			copy[i][2][z].topColor    = (angularVelocity > 0) ? cubelets[2][ir][z].rightColor  : cubelets[0][i][z].leftColor;
-			copy[i][0][z].bottomColor = (angularVelocity > 0) ? cubelets[0][ir][z].leftColor   : cubelets[2][i][z].rightColor;
-			copy[0][i][z].leftColor   = (angularVelocity > 0) ? cubelets[i][2][z].topColor     : cubelets[ir][0][z].bottomColor;
-			copy[2][i][z].rightColor  = (angularVelocity > 0) ? cubelets[i][0][z].bottomColor  : cubelets[ir][2][z].topColor;
+		int j = cubeUnits-1;
+		for (int i=0, ir=cubeUnits-1; i<cubeUnits; i++, ir--) {
+			copy[i][j][z].topColor    = (angularVelocity > 0) ? cubelets[j][ir][z].rightColor  : cubelets[0][i][z].leftColor;
+			copy[i][0][z].bottomColor = (angularVelocity > 0) ? cubelets[0][ir][z].leftColor   : cubelets[j][i][z].rightColor;
+			copy[0][i][z].leftColor   = (angularVelocity > 0) ? cubelets[i][j][z].topColor     : cubelets[ir][0][z].bottomColor;
+			copy[j][i][z].rightColor  = (angularVelocity > 0) ? cubelets[i][0][z].bottomColor  : cubelets[ir][j][z].topColor;
 		}
-		for (int x=0, xr=2; x<3; x++, xr--) {
-			for (int y=0, yr=2; y<3; y++, yr--) {
+		for (int x=0, xr=cubeUnits-1; x<cubeUnits; x++, xr--) {
+			for (int y=0, yr=cubeUnits-1; y<cubeUnits; y++, yr--) {
 				copy[x][y][z].frontColor = (angularVelocity > 0) ? cubelets[y][xr][z].frontColor : cubelets[yr][x][z].frontColor;
 				copy[x][y][z].rearColor  = (angularVelocity > 0) ? cubelets[y][xr][z].rearColor  : cubelets[yr][x][z].rearColor;
 			}
@@ -398,8 +397,29 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 		cubelets = copy;
 	}
 	
-	@Override
-	public void dispose(GLAutoDrawable drawable) { }
+	
+	private void resetCubeState() {
+		for (int x=0; x<cubeUnits; x++) {
+			for (int y=0; y<cubeUnits; y++) {
+				for (int z=0; z<cubeUnits; z++) {
+					cubelets[x][y][z] = new Cubelet();
+				}
+			}
+		}
+	}
+	
+	private Cubelet[][][] copyCubeState(Cubelet[][][] src) {
+		Cubelet[][][] dest = new Cubelet[cubeUnits][cubeUnits][cubeUnits];
+		for (int x=0; x<cubeUnits; x++) {
+			for (int y=0; y<cubeUnits; y++) {
+				for (int z=0; z<cubeUnits; z++) {
+					Cubelet other = src[x][y][z];
+					dest[x][y][z] = new Cubelet(other.frontColor, other.rearColor, other.topColor, other.bottomColor, other.leftColor, other.rightColor);
+				}
+			}
+		}
+		return dest;
+	}
 	
 	@Override
 	public void keyPressed(KeyEvent e) {
@@ -419,58 +439,31 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 				else cameraAngleY += CAMERA_ROTATE_STEP_DEGREES;
 				break;
 			case KeyEvent.VK_Q:
-				if (rotatingSection == 0) {
-					rotatingSection |= SECTION_COLUMN_LEFT;
-					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
-				}
+				rotateSection(SECTION_COLUMN_LEFT, e.isShiftDown());
 				break;
 			case KeyEvent.VK_W:
-				if (rotatingSection == 0) {
-					rotatingSection |= SECTION_COLUMN_MIDDLE;
-					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
-				}
+				rotateSection(SECTION_COLUMN_MIDDLE, e.isShiftDown());
 				break;
 			case KeyEvent.VK_E:
-				if (rotatingSection == 0) {
-					rotatingSection |= SECTION_COLUMN_RIGHT;
-					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
-				}
+				rotateSection(SECTION_COLUMN_RIGHT, e.isShiftDown());
 				break;
 			case KeyEvent.VK_A:
-				if (rotatingSection == 0) {
-					rotatingSection |= SECTION_ROW_TOP;
-					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
-				}
+				rotateSection(SECTION_ROW_TOP, e.isShiftDown());
 				break;
 			case KeyEvent.VK_S:
-				if (rotatingSection == 0) {
-					rotatingSection |= SECTION_ROW_MIDDLE;
-					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
-				}
+				rotateSection(SECTION_ROW_MIDDLE, e.isShiftDown());
 				break;
 			case KeyEvent.VK_D:
-				if (rotatingSection == 0) {
-					rotatingSection |= SECTION_ROW_BOTTOM;
-					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
-				}
+				rotateSection(SECTION_ROW_BOTTOM, e.isShiftDown());
 				break;
 			case KeyEvent.VK_Z:
-				if (rotatingSection == 0) {
-					rotatingSection |= SECTION_FACE_FRONT;
-					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
-				}
+				rotateSection(SECTION_FACE_FRONT, e.isShiftDown());
 				break;
 			case KeyEvent.VK_X:
-				if (rotatingSection == 0) {
-					rotatingSection |= SECTION_FACE_MIDDLE;
-					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
-				}
+				rotateSection(SECTION_FACE_MIDDLE, e.isShiftDown());
 				break;
 			case KeyEvent.VK_C:
-				if (rotatingSection == 0) {
-					rotatingSection |= SECTION_FACE_REAR;
-					angularVelocity = e.isShiftDown() ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
-				}
+				rotateSection(SECTION_FACE_REAR, e.isShiftDown());
 				break;
 			case KeyEvent.VK_J:
 				scramble = !scramble;
@@ -481,42 +474,20 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 				cameraAngleZ = ZERO_F;
 				zoom = DEFAULT_ZOOM;
 				if (e.isShiftDown()) {
-					columnRightAngleX = ZERO_F;
-					columnMiddleAngleX = ZERO_F;
-					columnLeftAngleX = ZERO_F;
-					rowTopAngleY = ZERO_F;
-					rowMiddleAngleY = ZERO_F;
-					rowBottomAngleY = ZERO_F;
-					faceFrontAngleZ = ZERO_F;
-					faceMiddleAngleZ = ZERO_F;
-					faceRearAngleZ = ZERO_F;
+					columnAnglesX = new float[cubeUnits];
+					rowAnglesY = new float[cubeUnits];
+					faceAnglesZ = new float[cubeUnits];
 					resetCubeState();
 				}
 				break;
 		}
 	}
 	
-	private void resetCubeState() {
-		for (int x=0; x<3; x++) {
-			for (int y=0; y<3; y++) {
-				for (int z=0; z<3; z++) {
-					cubelets[x][y][z] = new Cubelet();
-				}
-			}
+	private void rotateSection(int section, boolean reverse) {
+		if (rotatingSection == 0) {
+			rotatingSection |= section;
+			angularVelocity = reverse ? -Math.abs(angularVelocity) : Math.abs(angularVelocity);
 		}
-	}
-	
-	private Cubelet[][][] copyCubeState(Cubelet[][][] src) {
-		Cubelet[][][] dest = new Cubelet[3][3][3];
-		for (int x=0; x<3; x++) {
-			for (int y=0; y<3; y++) {
-				for (int z=0; z<3; z++) {
-					Cubelet other = src[x][y][z];
-					dest[x][y][z] = new Cubelet(other.frontColor, other.rearColor, other.topColor, other.bottomColor, other.leftColor, other.rightColor);
-				}
-			}
-		}
-		return dest;
 	}
 	
 	@Override
@@ -540,6 +511,7 @@ public class JOGLRubiksCube extends GLCanvas implements GLEventListener, KeyList
 		mouseY = e.getY();
 	}
 	
+	@Override public void dispose(GLAutoDrawable drawable) { }
 	@Override public void keyReleased(KeyEvent e) { }
 	@Override public void keyTyped(KeyEvent e) { }
 	@Override public void mouseClicked(MouseEvent e) { }
