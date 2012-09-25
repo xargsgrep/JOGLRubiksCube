@@ -1,6 +1,6 @@
 JOGLRubiksCube
 ==============
-A basic OpenGL Rubik's Cube implementation written in Java using JOGL 2.0.
+A basic OpenGL Rubik's Cube implementation written in Java using JOGL 2.0. Cube sizes greater than 3x3x3 are supported and can be specified by running it with a single integer argument for the size.
 
 Controls
 ==============
@@ -26,7 +26,10 @@ W:     Rotate middle around x+
 E:     Rotate left around x+
 
 Row controls:
-A:     Rotate top around y+S:     Rotate middle around y+D:     Rotate bottom around y+
+A:     Rotate top around y+
+S:     Rotate middle around y+
+D:     Rotate bottom around y+
+
 Face controls:
 Z:     Rotate front around z+
 X:     Rotate middle around z+
