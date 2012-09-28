@@ -2,18 +2,18 @@
  * Ahsan Rabbani <ahsan@xargsgrep.com>
  */
 
+package com.xargsgrep.rubikscube;
+
 /*
  * Represents a single rotation of a Rubik's Cube. Specifies axis, section, and direction.
  */
-package com.xargsgrep.rubikscube;
-
 public class Rotation {
 	
 	public enum Axis { X, Y, Z; }
 	public enum Direction { CLOCKWISE, COUNTER_CLOCKWISE; }
 	
 	Axis axis;
-	int section;
+	int section; // this is the index of the row/column/face that is to be rotated
 	Direction direction;
 	
 	public Rotation(Axis axis, int section, Direction direction) {
@@ -32,6 +32,10 @@ public class Rotation {
 
 	public Direction getDirection() {
 		return direction;
+	}
+	
+	public boolean isClockwise() {
+		return (direction == Direction.CLOCKWISE);
 	}
 	
 }

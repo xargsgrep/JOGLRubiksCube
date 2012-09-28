@@ -5,7 +5,6 @@
 package com.xargsgrep.rubikscube;
 
 import com.xargsgrep.rubikscube.Rotation.Axis;
-import com.xargsgrep.rubikscube.Rotation.Direction;
 
 /*
  * Represents a Rubik's Cube using a 3-dimensional array of Cubies. This implementation supports cubes of any size.
@@ -33,6 +32,11 @@ public class RubiksCube {
 		resetState();
 	}
 	
+	public RubiksCube(Cubie[][][] state) {
+		this.size = state.length;
+		this.state = state;
+	}
+	
 	public int getSize() {
 		return size;
 	}
@@ -55,8 +59,8 @@ public class RubiksCube {
 	}
 	
 	public void applyRotation(Rotation rotation) {
-		if (rotation.getSection() > (size-1))
-			throw new RuntimeException("Specified rotation is out of bounds");
+		if (rotation.getSection() >= size)
+			throw new RuntimeException("Specified rotation section is out of bounds: " + rotation.getSection());
 			
 		if (rotation.getAxis() == Axis.X)
 			applyXRotation(rotation);
@@ -76,21 +80,25 @@ public class RubiksCube {
 		}
 	}
 	
+	public RubiksCube getCopy() {
+		return new RubiksCube(copyState());
+	}
+	
 	private void applyXRotation(Rotation rotation) {
 		int x = rotation.getSection();
 		int j = size-1;
 		
 		Cubie[][][] copy = copyState();
 		for (int i=0, ir=size-1; i<size; i++, ir--) {
-			copy[x][j][i].topColor    = (rotation.getDirection() == Direction.CLOCKWISE) ? state[x][i][0].frontColor   : state[x][ir][j].rearColor;
-			copy[x][0][i].bottomColor = (rotation.getDirection() == Direction.CLOCKWISE) ? state[x][i][j].rearColor    : state[x][ir][0].frontColor;
-			copy[x][i][0].frontColor  = (rotation.getDirection() == Direction.CLOCKWISE) ? state[x][0][ir].bottomColor : state[x][j][i].topColor;
-			copy[x][i][j].rearColor   = (rotation.getDirection() == Direction.CLOCKWISE) ? state[x][j][ir].topColor    : state[x][0][i].bottomColor;
+			copy[x][j][i].topColor    = rotation.isClockwise() ? state[x][i][0].frontColor   : state[x][ir][j].rearColor;
+			copy[x][0][i].bottomColor = rotation.isClockwise() ? state[x][i][j].rearColor    : state[x][ir][0].frontColor;
+			copy[x][i][0].frontColor  = rotation.isClockwise() ? state[x][0][ir].bottomColor : state[x][j][i].topColor;
+			copy[x][i][j].rearColor   = rotation.isClockwise() ? state[x][j][ir].topColor    : state[x][0][i].bottomColor;
 		}
 		for (int y=0, yr=size-1; y<size; y++, yr--) {
 			for (int z=0, zr=size-1; z<size; z++, zr--) {
-				copy[x][y][z].leftColor  = (rotation.getDirection() == Direction.CLOCKWISE) ? state[x][z][yr].leftColor  : state[x][zr][y].leftColor;
-				copy[x][y][z].rightColor = (rotation.getDirection() == Direction.CLOCKWISE) ? state[x][z][yr].rightColor : state[x][zr][y].rightColor;
+				copy[x][y][z].leftColor  = rotation.isClockwise() ? state[x][z][yr].leftColor  : state[x][zr][y].leftColor;
+				copy[x][y][z].rightColor = rotation.isClockwise() ? state[x][z][yr].rightColor : state[x][zr][y].rightColor;
 			}
 		}
 		state = copy;
@@ -102,15 +110,15 @@ public class RubiksCube {
 		
 		Cubie[][][] copy = copyState();
 		for (int i=0, ir=size-1; i<size; i++, ir--) {
-			copy[0][y][i].leftColor  = (rotation.getDirection() == Direction.CLOCKWISE) ? state[ir][y][0].frontColor :  state[i][y][j].rearColor;
-			copy[j][y][i].rightColor = (rotation.getDirection() == Direction.CLOCKWISE) ? state[ir][y][j].rearColor  : state[i][y][0].frontColor;
-			copy[i][y][0].frontColor = (rotation.getDirection() == Direction.CLOCKWISE) ? state[j][y][i].rightColor  : state[0][y][ir].leftColor;
-			copy[i][y][j].rearColor  = (rotation.getDirection() == Direction.CLOCKWISE) ? state[0][y][i].leftColor   : state[j][y][ir].rightColor;
+			copy[0][y][i].leftColor  = rotation.isClockwise() ? state[ir][y][0].frontColor :  state[i][y][j].rearColor;
+			copy[j][y][i].rightColor = rotation.isClockwise() ? state[ir][y][j].rearColor  : state[i][y][0].frontColor;
+			copy[i][y][0].frontColor = rotation.isClockwise() ? state[j][y][i].rightColor  : state[0][y][ir].leftColor;
+			copy[i][y][j].rearColor  = rotation.isClockwise() ? state[0][y][i].leftColor   : state[j][y][ir].rightColor;
 		}
 		for (int x=0, xr=size-1; x<size; x++, xr--) {
 			for (int z=0, zr=size-1; z<size; z++, zr--) {
-				copy[x][y][z].topColor    = (rotation.getDirection() == Direction.CLOCKWISE) ? state[zr][y][x].topColor    : state[z][y][xr].topColor;
-				copy[x][y][z].bottomColor = (rotation.getDirection() == Direction.CLOCKWISE) ? state[zr][y][x].bottomColor : state[z][y][xr].bottomColor;
+				copy[x][y][z].topColor    = rotation.isClockwise() ? state[zr][y][x].topColor    : state[z][y][xr].topColor;
+				copy[x][y][z].bottomColor = rotation.isClockwise() ? state[zr][y][x].bottomColor : state[z][y][xr].bottomColor;
 			}
 		}
 		state = copy;
@@ -122,15 +130,15 @@ public class RubiksCube {
 		
 		Cubie[][][] copy = copyState();
 		for (int i=0, ir=size-1; i<size; i++, ir--) {
-			copy[i][j][z].topColor    = (rotation.getDirection() == Direction.CLOCKWISE) ? state[0][i][z].leftColor    : state[j][ir][z].rightColor;
-			copy[i][0][z].bottomColor = (rotation.getDirection() == Direction.CLOCKWISE) ? state[j][i][z].rightColor   : state[0][ir][z].leftColor;
-			copy[0][i][z].leftColor   = (rotation.getDirection() == Direction.CLOCKWISE) ? state[ir][0][z].bottomColor : state[i][j][z].topColor;
-			copy[j][i][z].rightColor  = (rotation.getDirection() == Direction.CLOCKWISE) ? state[ir][j][z].topColor    : state[i][0][z].bottomColor;
+			copy[i][j][z].topColor    = rotation.isClockwise() ? state[0][i][z].leftColor    : state[j][ir][z].rightColor;
+			copy[i][0][z].bottomColor = rotation.isClockwise() ? state[j][i][z].rightColor   : state[0][ir][z].leftColor;
+			copy[0][i][z].leftColor   = rotation.isClockwise() ? state[ir][0][z].bottomColor : state[i][j][z].topColor;
+			copy[j][i][z].rightColor  = rotation.isClockwise() ? state[ir][j][z].topColor    : state[i][0][z].bottomColor;
 		}
 		for (int x=0, xr=size-1; x<size; x++, xr--) {
 			for (int y=0, yr=size-1; y<size; y++, yr--) {
-				copy[x][y][z].frontColor = (rotation.getDirection() == Direction.CLOCKWISE) ? state[yr][x][z].frontColor : state[y][xr][z].frontColor;
-				copy[x][y][z].rearColor  = (rotation.getDirection() == Direction.CLOCKWISE) ? state[yr][x][z].rearColor  : state[y][xr][z].rearColor;
+				copy[x][y][z].frontColor = rotation.isClockwise() ? state[yr][x][z].frontColor : state[y][xr][z].frontColor;
+				copy[x][y][z].rearColor  = rotation.isClockwise() ? state[yr][x][z].rearColor  : state[y][xr][z].rearColor;
 			}
 		}
 		state = copy;

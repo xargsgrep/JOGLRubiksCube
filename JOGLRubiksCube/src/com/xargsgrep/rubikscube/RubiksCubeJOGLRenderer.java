@@ -15,6 +15,7 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SMOOTH;
 import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_MODELVIEW;
 import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_PROJECTION;
 
+import java.util.List;
 import java.util.Random;
 
 import javax.media.opengl.GL2;
@@ -87,7 +88,9 @@ public class RubiksCubeJOGLRenderer extends GLCanvas implements GLEventListener,
 	private int mouseY = 0;
 	
 	private RubiksCube rubiksCube;
-	private boolean scramble = false;
+	
+	private RotationAnimatorThread scrambleAnimatorThread;
+	private RotationAnimatorThread solutionAnimatorThread;
 
 	public RubiksCubeJOGLRenderer(int size) {
 		rubiksCube = new RubiksCube(size);
@@ -219,34 +222,25 @@ public class RubiksCubeJOGLRenderer extends GLCanvas implements GLEventListener,
 	private void glApplyColor(GL2 gl, Color color) {
 		switch (color) {
 			case WHITE:
-				gl.glColor3f(ONE_F, ONE_F, ONE_F);
-				break;
+				gl.glColor3f(ONE_F, ONE_F, ONE_F); break;
 			case YELLOW:
-				gl.glColor3f(ONE_F, ONE_F, ZERO_F);
-				break;
+				gl.glColor3f(ONE_F, ONE_F, ZERO_F); break;
 			case GREEN:
-				gl.glColor3f(ZERO_F, ONE_F, ZERO_F);
-				break;
+				gl.glColor3f(ZERO_F, ONE_F, ZERO_F); break;
 			case ORANGE:
-				gl.glColor3f(ONE_F, ONE_F/2, ZERO_F);
-				break;
+				gl.glColor3f(ONE_F, ONE_F/2, ZERO_F); break;
 			case BLUE:
-				gl.glColor3f(ZERO_F, ZERO_F, ONE_F);
-				break;
+				gl.glColor3f(ZERO_F, ZERO_F, ONE_F); break;
 			case RED:
-				gl.glColor3f(ONE_F, ZERO_F, ZERO_F);
-				break;
+				gl.glColor3f(ONE_F, ZERO_F, ZERO_F); break;
 		}
 	}
 	
+	private boolean isRotating() {
+		return rotatingSectionX + rotatingSectionY + rotatingSectionZ > -3;
+	}
+	
 	private void updateRotationAngles() {
-		if (scramble) {
-			Random random = new Random();
-			int section = random.nextInt(rubiksCube.getSize());
-			Axis axis = Axis.values()[random.nextInt(Axis.values().length)];
-			rotateSection(section, axis, (Math.random() < 0.5));
-		}
-		
 		Direction direction = (angularVelocity > 0) ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
 		if (rotatingSectionX >= 0) {
 			columnAnglesX[rotatingSectionX] += angularVelocity;
@@ -274,6 +268,8 @@ public class RubiksCubeJOGLRenderer extends GLCanvas implements GLEventListener,
 		}
 	}
 	
+	// section is the index of the column/row/face that is to be rotated.
+	// if reverse is true then rotation will be clockwise
 	private void rotateSection(int section, Axis axis, boolean reverse) {
 		// make sure nothing is currently rotating
 		if (!isRotating()) {
@@ -284,8 +280,38 @@ public class RubiksCubeJOGLRenderer extends GLCanvas implements GLEventListener,
 		}
 	}
 	
-	private boolean isRotating() {
-		return rotatingSectionX + rotatingSectionY + rotatingSectionZ > -3;
+	private void toggleScrambleCube() {
+		if (scrambleAnimatorThread == null || !scrambleAnimatorThread.isAlive()) {
+			scrambleAnimatorThread = new RotationAnimatorThread() {
+				@Override protected int getSection(int i) { return new Random().nextInt(rubiksCube.getSize()); }
+				@Override protected Axis getAxis(int i) { return Axis.values()[new Random().nextInt(Axis.values().length)]; }
+				@Override protected boolean isReverse(int i) { return new Random().nextBoolean(); }
+				@Override protected boolean isComplete(int i) { return false; }
+			};
+			scrambleAnimatorThread.start();
+		}
+		else {
+			scrambleAnimatorThread.terminate();
+		}
+	}
+	
+	private void toggleSolveCube() {
+		if (solutionAnimatorThread == null || !solutionAnimatorThread.isAlive()) {
+			RubiksCubeSolver solver = new RubiksCubeSolver(rubiksCube.getCopy());
+			final List<Rotation> rotations = solver.getSolution();
+			System.out.println("Found solution with " + rotations.size() + " moves");
+		
+			solutionAnimatorThread = new RotationAnimatorThread() {
+				@Override protected int getSection(int i) { return rotations.get(i).getSection(); }
+				@Override protected Axis getAxis(int i) { return rotations.get(i).getAxis(); }
+				@Override protected boolean isReverse(int i) { return rotations.get(i).isClockwise(); }
+				@Override protected boolean isComplete(int i) { return (i == rotations.size()); }
+			};
+			solutionAnimatorThread.start();
+		}
+		else {
+			solutionAnimatorThread.terminate();
+		}
 	}
 	
 	@Override
@@ -324,9 +350,11 @@ public class RubiksCubeJOGLRenderer extends GLCanvas implements GLEventListener,
 			case KeyEvent.VK_C:
 				rotateSection(RubiksCube.FACE_REAR, Axis.Z, e.isShiftDown()); break;
 			case KeyEvent.VK_J:
-				scramble = !scramble; break;
+				toggleScrambleCube();
+				break;
 			case KeyEvent.VK_B:
-				// TODO: solve
+				toggleSolveCube();
+				break;
 			case KeyEvent.VK_R:
 				cameraAngleX = DEFAULT_CAMERA_ANGLE_X;
 				cameraAngleY = DEFAULT_CAMERA_ANGLE_Y;
@@ -401,6 +429,31 @@ public class RubiksCubeJOGLRenderer extends GLCanvas implements GLEventListener,
 		window.setTitle(TITLE);
 		window.setVisible(true);
 		animator.start();	
+	}
+	
+	private abstract class RotationAnimatorThread extends Thread {
+		
+		protected abstract int getSection(int i);
+		protected abstract Axis getAxis(int i);
+		protected abstract boolean isReverse(int i);
+		protected abstract boolean isComplete(int i);
+		
+		private boolean isTerminated = false;
+		
+		public void terminate() { isTerminated = true; }
+		
+		@Override
+		public void run() {
+			int i = 0;
+			while (!isTerminated && !isComplete(i)) {
+				while (isRotating()) {
+					try { Thread.sleep(10); }
+					catch (InterruptedException e) { }
+				}
+				rotateSection(getSection(i), getAxis(i), isReverse(i));
+				i++;
+			}
+		}
 	}
 	
 }
