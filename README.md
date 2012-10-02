@@ -1,7 +1,7 @@
 # JOGL Rubik's Cube
 
 ## Description
-A basic OpenGL Rubik's Cube implementation written in Java using JOGL 2.0. The size of the cube can be specified with the first argument (default is 3). While any size cube can be rendered and scrambled, there are only enough controls to manipulate a 3x3x3 cube.
+A basic OpenGL Rubik's Cube implementation written in Java using JOGL 2.0. The size of the cube can be specified with the first argument (default is 3). While any cube size can be rendered and scrambled, there are only enough controls to manipulate a 3x3x3 cube.
 
 ## Controls
 #### Camera

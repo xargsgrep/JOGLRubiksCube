@@ -40,7 +40,7 @@ import com.xargsgrep.rubikscube.Rotation.Direction;
 
 /*
  * Renders a Rubik's Cube using the JOGL 2.0 library. The size of the cube can be specified with
- * the first argument (default is 3). While any size cube can be rendered and scrambled, there are
+ * the first argument (default is 3). While any cube size can be rendered and scrambled, there are
  * only enough controls to manipulate a 3x3x3 cube.
  */
 @SuppressWarnings("serial")
@@ -84,8 +84,8 @@ public class RubiksCubeJOGLRenderer extends GLCanvas implements GLEventListener,
 	private int rotatingSectionZ = -1;
 	private float angularVelocity = 5.0f; // speed and direction of rotating sections
 	
-	private int mouseX = 0;
-	private int mouseY = 0;
+	private int mouseX = CANVAS_WIDTH/2;
+	private int mouseY = CANVAS_HEIGHT/2;
 	
 	private RubiksCube rubiksCube;
 	
@@ -242,6 +242,7 @@ public class RubiksCubeJOGLRenderer extends GLCanvas implements GLEventListener,
 	
 	private void updateRotationAngles() {
 		Direction direction = (angularVelocity > 0) ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
+		
 		if (rotatingSectionX >= 0) {
 			columnAnglesX[rotatingSectionX] += angularVelocity;
 			if (columnAnglesX[rotatingSectionX] % SECTION_ROTATE_STEP_DEGREES == 0) {
@@ -432,15 +433,14 @@ public class RubiksCubeJOGLRenderer extends GLCanvas implements GLEventListener,
 	}
 	
 	private abstract class RotationAnimatorThread extends Thread {
+		private boolean isTerminated = false;
+		
+		public void terminate() { isTerminated = true; }
 		
 		protected abstract int getSection(int i);
 		protected abstract Axis getAxis(int i);
 		protected abstract boolean isReverse(int i);
 		protected abstract boolean isComplete(int i);
-		
-		private boolean isTerminated = false;
-		
-		public void terminate() { isTerminated = true; }
 		
 		@Override
 		public void run() {
