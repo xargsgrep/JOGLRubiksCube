@@ -17,14 +17,21 @@ public class Cubie {
 	public static final int FACELET_TOP    = (1 << 4);
 	public static final int FACELET_BOTTOM = (1 << 5);
 	
+	public static final Color SOLVED_STATE_FRONT_COLOR  = Color.WHITE;
+	public static final Color SOLVED_STATE_REAR_COLOR   = Color.YELLOW;
+	public static final Color SOLVED_STATE_TOP_COLOR    = Color.GREEN;
+	public static final Color SOLVED_STATE_BOTTOM_COLOR = Color.BLUE;
+	public static final Color SOLVED_STATE_LEFT_COLOR   = Color.RED;
+	public static final Color SOLVED_STATE_RIGHT_COLOR  = Color.ORANGE;
+	
 	public enum Color { WHITE, YELLOW, GREEN, ORANGE, BLUE, RED; };
 	
-	Color frontColor = Color.WHITE;
-	Color rearColor = Color.YELLOW;
-	Color topColor = Color.GREEN;
-	Color bottomColor = Color.BLUE;
-	Color leftColor = Color.RED;
-	Color rightColor = Color.ORANGE;
+	Color frontColor  = SOLVED_STATE_FRONT_COLOR;
+	Color rearColor   = SOLVED_STATE_REAR_COLOR;
+	Color topColor    = SOLVED_STATE_TOP_COLOR;
+	Color bottomColor = SOLVED_STATE_BOTTOM_COLOR;
+	Color leftColor   = SOLVED_STATE_LEFT_COLOR;
+	Color rightColor  = SOLVED_STATE_RIGHT_COLOR;
 	
 	public Cubie() { }
 	

@@ -49,11 +49,26 @@ public class RubiksCube {
 		return state;
 	}
 	
+	public Cubie getCubie(CubiePosition position) {
+		return getCubie(position.x, position.y, position.z);
+	}
+	
 	public Cubie getCubie(int x, int y, int z) {
 		return state[x][y][z];
 	}
 	
-	// returns integer denoting which faces on the specified cubie are visible
+	public boolean isCubieSolved(Cubie cubie, CubiePosition position) {
+		int lastIdx = size-1;
+		if (position.x == 0 && cubie.leftColor != Color.RED)           return false;
+		if (position.x == lastIdx && cubie.rightColor != Color.ORANGE) return false;
+		if (position.y == 0 && cubie.bottomColor != Color.BLUE)        return false;
+		if (position.y == lastIdx && cubie.topColor != Color.GREEN)    return false;
+		if (position.z == 0 && cubie.frontColor != Color.WHITE)        return false;
+		if (position.z == lastIdx && cubie.rearColor != Color.YELLOW)  return false;
+		return true;
+	}
+	
+	// returns integer denoting which of the faces on the cubie at the specified position are visible
 	public int getVisibleFaces(int x, int y, int z) {
 		int lastIdx = size-1;
 		int visibleFaces = (x == 0) ? Cubie.FACELET_LEFT   : ((x == lastIdx) ? Cubie.FACELET_RIGHT : 0);
@@ -62,17 +77,40 @@ public class RubiksCube {
 		return visibleFaces;
 	}
 	
-	// returns a list containing all the visible colors for the specified cubie
+	public List<Color> getVisibleColors(CubiePosition position) {
+		return getVisibleColors(position.x, position.y, position.z);
+	}
+	
+	// returns a list of all the currently visible colors for the cubie at the specified position
 	public List<Color> getVisibleColors(int x, int y, int z) {
-		List<Color> colors = new ArrayList<Color>();
+		List<Color> colors = new ArrayList<Color>(3);
 		int visibleFaces = getVisibleFaces(x, y, z);
 		
-		if ((visibleFaces & Cubie.FACELET_LEFT) > 0) colors.add(getCubie(x, y, z).leftColor);
-		if ((visibleFaces & Cubie.FACELET_RIGHT) > 0) colors.add(getCubie(x, y, z).rightColor);
+		if ((visibleFaces & Cubie.FACELET_LEFT) > 0)   colors.add(getCubie(x, y, z).leftColor);
+		if ((visibleFaces & Cubie.FACELET_RIGHT) > 0)  colors.add(getCubie(x, y, z).rightColor);
 		if ((visibleFaces & Cubie.FACELET_BOTTOM) > 0) colors.add(getCubie(x, y, z).bottomColor);
-		if ((visibleFaces & Cubie.FACELET_TOP) > 0) colors.add(getCubie(x, y, z).topColor);
-		if ((visibleFaces & Cubie.FACELET_FRONT) > 0) colors.add(getCubie(x, y, z).frontColor);
-		if ((visibleFaces & Cubie.FACELET_REAR) > 0) colors.add(getCubie(x, y, z).rearColor);
+		if ((visibleFaces & Cubie.FACELET_TOP) > 0)    colors.add(getCubie(x, y, z).topColor);
+		if ((visibleFaces & Cubie.FACELET_FRONT) > 0)  colors.add(getCubie(x, y, z).frontColor);
+		if ((visibleFaces & Cubie.FACELET_REAR) > 0)   colors.add(getCubie(x, y, z).rearColor);
+		
+		return colors;
+	}
+	
+	public List<Color> getVisibleColorsInSolvedState(CubiePosition position) {
+		return getVisibleColorsInSolvedState(position.x, position.y, position.z);
+	}
+	
+	// returns a list of all the visible colors for the cubie at the specified position when the cube is in a solved state
+	public List<Color> getVisibleColorsInSolvedState(int x, int y, int z) {
+		List<Color> colors = new ArrayList<Color>(3);
+		int visibleFaces = getVisibleFaces(x, y, z);
+		
+		if ((visibleFaces & Cubie.FACELET_LEFT) > 0)   colors.add(Cubie.SOLVED_STATE_LEFT_COLOR);
+		if ((visibleFaces & Cubie.FACELET_RIGHT) > 0)  colors.add(Cubie.SOLVED_STATE_RIGHT_COLOR);
+		if ((visibleFaces & Cubie.FACELET_BOTTOM) > 0) colors.add(Cubie.SOLVED_STATE_BOTTOM_COLOR);
+		if ((visibleFaces & Cubie.FACELET_TOP) > 0)    colors.add(Cubie.SOLVED_STATE_TOP_COLOR);
+		if ((visibleFaces & Cubie.FACELET_FRONT) > 0)  colors.add(Cubie.SOLVED_STATE_FRONT_COLOR);
+		if ((visibleFaces & Cubie.FACELET_REAR) > 0)   colors.add(Cubie.SOLVED_STATE_REAR_COLOR);
 		
 		return colors;
 	}
