@@ -57,7 +57,9 @@ public class RubiksCube {
 		return state[x][y][z];
 	}
 	
-	public boolean isCubieSolved(Cubie cubie, CubiePosition position) {
+	public boolean isPositionSolved(CubiePosition position) {
+		Cubie cubie = getCubie(position);
+		
 		int lastIdx = size-1;
 		if (position.x == 0 && cubie.leftColor != Color.RED)           return false;
 		if (position.x == lastIdx && cubie.rightColor != Color.ORANGE) return false;

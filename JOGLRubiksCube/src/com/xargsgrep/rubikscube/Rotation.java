@@ -10,7 +10,16 @@ package com.xargsgrep.rubikscube;
 public class Rotation {
 	
 	public enum Axis { X, Y, Z; }
-	public enum Direction { CLOCKWISE, COUNTER_CLOCKWISE; }
+	public enum Direction { 
+		CLOCKWISE {
+			@Override public Direction reverse() { return COUNTER_CLOCKWISE; }
+		},
+		COUNTER_CLOCKWISE {
+			@Override public Direction reverse() { return CLOCKWISE; }
+		}; 
+		
+		public abstract Direction reverse();
+	}
 	
 	Axis axis;
 	int section; // this is the index of the row/column/face that is to be rotated

@@ -19,34 +19,34 @@ import com.xargsgrep.rubikscube.Rotation.Direction;
  */
 public class RubiksCubeSolver {
 	
-//	private static final CubiePosition CENTER_FRONT  = new CubiePosition(1, 1, 0);
-	private static final CubiePosition CENTER_REAR   = new CubiePosition(1, 1, 2);
-	private static final CubiePosition CENTER_TOP    = new CubiePosition(1, 2, 1);
-	private static final CubiePosition CENTER_BOTTOM = new CubiePosition(1, 0, 1);
-	private static final CubiePosition CENTER_LEFT   = new CubiePosition(0, 1, 1);
-	private static final CubiePosition CENTER_RIGHT  = new CubiePosition(2, 1, 1);
+	public static final CubiePosition CENTER_FRONT  = new CubiePosition(1, 1, 0);
+	public static final CubiePosition CENTER_REAR   = new CubiePosition(1, 1, 2);
+	public static final CubiePosition CENTER_TOP    = new CubiePosition(1, 2, 1);
+	public static final CubiePosition CENTER_BOTTOM = new CubiePosition(1, 0, 1);
+	public static final CubiePosition CENTER_LEFT   = new CubiePosition(0, 1, 1);
+	public static final CubiePosition CENTER_RIGHT  = new CubiePosition(2, 1, 1);
 	
-	private static final CubiePosition EDGE_FRONT_LEFT    = new CubiePosition(0, 1, 0);
-	private static final CubiePosition EDGE_FRONT_RIGHT   = new CubiePosition(2, 1, 0);
-	private static final CubiePosition EDGE_FRONT_TOP     = new CubiePosition(1, 2, 0);
-	private static final CubiePosition EDGE_FRONT_BOTTOM  = new CubiePosition(1, 0, 0);
-	private static final CubiePosition EDGE_MIDDLE_TOP_LEFT     = new CubiePosition(0, 2, 1);
-	private static final CubiePosition EDGE_MIDDLE_BOTTOM_LEFT  = new CubiePosition(0, 0, 1);
-	private static final CubiePosition EDGE_MIDDLE_TOP_RIGHT    = new CubiePosition(2, 2, 1);
-	private static final CubiePosition EDGE_MIDDLE_BOTTOM_RIGHT = new CubiePosition(2, 0, 1);
-	private static final CubiePosition EDGE_REAR_LEFT     = new CubiePosition(0, 1, 2);
-	private static final CubiePosition EDGE_REAR_RIGHT    = new CubiePosition(2, 1, 2);
-	private static final CubiePosition EDGE_REAR_TOP      = new CubiePosition(1, 2, 2);
-	private static final CubiePosition EDGE_REAR_BOTTOM   = new CubiePosition(1, 0, 2);
+	public static final CubiePosition EDGE_FRONT_LEFT    = new CubiePosition(0, 1, 0);
+	public static final CubiePosition EDGE_FRONT_RIGHT   = new CubiePosition(2, 1, 0);
+	public static final CubiePosition EDGE_FRONT_TOP     = new CubiePosition(1, 2, 0);
+	public static final CubiePosition EDGE_FRONT_BOTTOM  = new CubiePosition(1, 0, 0);
+	public static final CubiePosition EDGE_MIDDLE_TOP_LEFT     = new CubiePosition(0, 2, 1);
+	public static final CubiePosition EDGE_MIDDLE_BOTTOM_LEFT  = new CubiePosition(0, 0, 1);
+	public static final CubiePosition EDGE_MIDDLE_TOP_RIGHT    = new CubiePosition(2, 2, 1);
+	public static final CubiePosition EDGE_MIDDLE_BOTTOM_RIGHT = new CubiePosition(2, 0, 1);
+	public static final CubiePosition EDGE_REAR_LEFT     = new CubiePosition(0, 1, 2);
+	public static final CubiePosition EDGE_REAR_RIGHT    = new CubiePosition(2, 1, 2);
+	public static final CubiePosition EDGE_REAR_TOP      = new CubiePosition(1, 2, 2);
+	public static final CubiePosition EDGE_REAR_BOTTOM   = new CubiePosition(1, 0, 2);
 	
-	private static final CubiePosition CORNER_FRONT_TOP_LEFT     = new CubiePosition(0, 2, 0);
-	private static final CubiePosition CORNER_FRONT_BOTTOM_LEFT  = new CubiePosition(0, 0, 0);
-	private static final CubiePosition CORNER_FRONT_TOP_RIGHT    = new CubiePosition(2, 2, 0);
-	private static final CubiePosition CORNER_FRONT_BOTTOM_RIGHT = new CubiePosition(2, 0, 0);
-	private static final CubiePosition CORNER_REAR_TOP_LEFT      = new CubiePosition(0, 2, 2);
-	private static final CubiePosition CORNER_REAR_BOTTOM_LEFT   = new CubiePosition(0, 0, 2);
-	private static final CubiePosition CORNER_REAR_TOP_RIGHT     = new CubiePosition(2, 2, 2);
-	private static final CubiePosition CORNER_REAR_BOTTOM_RIGHT  = new CubiePosition(2, 0, 2);
+	public static final CubiePosition CORNER_FRONT_TOP_LEFT     = new CubiePosition(0, 2, 0);
+	public static final CubiePosition CORNER_FRONT_BOTTOM_LEFT  = new CubiePosition(0, 0, 0);
+	public static final CubiePosition CORNER_FRONT_TOP_RIGHT    = new CubiePosition(2, 2, 0);
+	public static final CubiePosition CORNER_FRONT_BOTTOM_RIGHT = new CubiePosition(2, 0, 0);
+	public static final CubiePosition CORNER_REAR_TOP_LEFT      = new CubiePosition(0, 2, 2);
+	public static final CubiePosition CORNER_REAR_BOTTOM_LEFT   = new CubiePosition(0, 0, 2);
+	public static final CubiePosition CORNER_REAR_TOP_RIGHT     = new CubiePosition(2, 2, 2);
+	public static final CubiePosition CORNER_REAR_BOTTOM_RIGHT  = new CubiePosition(2, 0, 2);
 	
 	RubiksCube cube;
 	List<Rotation> rotations;
@@ -114,14 +114,13 @@ public class RubiksCubeSolver {
 		}
 	}
 	
-	private void step1SolveEdge(CubiePosition edgePosition) {
-		Cubie edgeCubie = cube.getCubie(edgePosition);
-		List<Color> colors = cube.getVisibleColorsInSolvedState(edgePosition);
+	private void step1SolveEdge(CubiePosition destination) {
+		List<Color> colors = cube.getVisibleColorsInSolvedState(destination);
 		
-		while (!cube.isCubieSolved(edgeCubie, edgePosition)) {
+		while (!cube.isPositionSolved(destination)) {
 			CubiePosition source = findCubiePositionWithColors(colors.toArray(new Color[0]));
 		
-			if (source.equals(edgePosition)) {
+			if (source.equals(destination)) {
 				// edge is in correct position but wrong orientation, solve it
 				Axis axis1 = source.isInRowMiddle() ? Axis.X : Axis.Y;
 				int section1 = source.isInRowMiddle() ? source.x : source.y;
@@ -159,25 +158,22 @@ public class RubiksCubeSolver {
 			}
 			else if (source.isInFaceRear()) {
 				// edge is in the rear face, get it into the correct position in the front face
-				if (source.x != edgePosition.x && source.y != edgePosition.y) {
-					Direction direction = ((edgePosition.isInColumnLeft() && source.isInRowTop()) || (edgePosition.isInColumnRight() && source.isInRowBottom()))
-							? Direction.COUNTER_CLOCKWISE
-							: Direction.CLOCKWISE;
-					
+				if (source.x != destination.x && source.y != destination.y) {
+					Direction direction = ((destination.isInColumnLeft() && source.isInRowTop()) || (destination.isInColumnRight() && source.isInRowBottom()))
+						? Direction.COUNTER_CLOCKWISE
+						: Direction.CLOCKWISE;
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, direction));
 				}
-				else if ((source.x == edgePosition.x && source.y != edgePosition.y) || (source.x != edgePosition.x && source.y == edgePosition.y)) {
+				else if ((source.x == destination.x && source.y != destination.y) || (source.x != destination.x && source.y == destination.y)) {
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
 				}
 				
-				Axis axis = edgePosition.isInRowMiddle() ? Axis.X : Axis.Y;
-				int section = edgePosition.isInRowMiddle() ? edgePosition.x : edgePosition.y;
+				Axis axis = destination.isInRowMiddle() ? Axis.X : Axis.Y;
+				int section = destination.isInRowMiddle() ? destination.x : destination.y;
 				addRotationAndApply(new Rotation(axis, section, Direction.CLOCKWISE));
 				addRotationAndApply(new Rotation(axis, section, Direction.CLOCKWISE));
 			}
-			
-			edgeCubie = cube.getCubie(edgePosition);
 		}
 	}
 	
@@ -191,11 +187,10 @@ public class RubiksCubeSolver {
 		}
 	}
 	
-	private void step2SolveCorner(CubiePosition cornerPosition) {
-		Cubie cornerCubie = cube.getCubie(cornerPosition);
-		List<Color> colors = cube.getVisibleColorsInSolvedState(cornerPosition);
+	private void step2SolveCorner(CubiePosition destination) {
+		List<Color> colors = cube.getVisibleColorsInSolvedState(destination);
 		
-		while (!cube.isCubieSolved(cornerCubie, cornerPosition)) {
+		while (!cube.isPositionSolved(destination)) {
 			CubiePosition source = findCubiePositionWithColors(colors.toArray(new Color[0]));
 			
 			if (source.isInFaceFront()) {
@@ -204,119 +199,262 @@ public class RubiksCubeSolver {
 				addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
 				addRotationAndApply(new Rotation(Axis.X, source.x, source.isInRowTop() ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE));
 			}
-			else if (source.isInFaceRear() && (source.x == cornerPosition.x && source.y == cornerPosition.y)) {
+			else if (source.isInFaceRear() && (source.x == destination.x && source.y == destination.y)) {
 				// corner is in the rear face and is aligned with the appropriate front corner, solve it
 				Cubie sourceCubie = cube.getCubie(source);
-				if ((source.x == 0 && source.y == 0 && sourceCubie.bottomColor == Color.WHITE)
-						|| (source.x == 2 && source.y == 0 && sourceCubie.rightColor == Color.WHITE)
-						|| (source.x == 2 && source.y == 2 && sourceCubie.topColor == Color.WHITE)
-						|| (source.x == 0 && source.y == 2 && sourceCubie.leftColor == Color.WHITE))
+				if ((source.isInColumnLeft() && source.isInRowBottom() && sourceCubie.bottomColor == Color.WHITE)
+						|| (source.isInColumnRight() && source.isInRowBottom() && sourceCubie.rightColor == Color.WHITE)
+						|| (source.isInColumnRight() && source.isInRowTop() && sourceCubie.topColor == Color.WHITE)
+						|| (source.isInColumnLeft() && source.isInRowTop() && sourceCubie.leftColor == Color.WHITE))
 				{
 					Axis axis = (source.x == source.y) ? Axis.X : Axis.Y;
 					int section = (source.x == source.y) ? source.x : source.y;
-					Direction direction1 = (source.isInRowTop()) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
-					Direction direction2 = (source.isInRowTop()) ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
+					Direction direction = (source.isInRowTop()) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
 					
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.COUNTER_CLOCKWISE));
-					addRotationAndApply(new Rotation(axis, section, direction1));
+					addRotationAndApply(new Rotation(axis, section, direction));
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
-					addRotationAndApply(new Rotation(axis, section, direction2));
+					addRotationAndApply(new Rotation(axis, section, direction.reverse()));
 				}
-				else if ((source.x == 0 && source.y == 0 && sourceCubie.leftColor == Color.WHITE)
-						|| (source.x == 2 && source.y == 0 && sourceCubie.bottomColor == Color.WHITE)
-						|| (source.x == 2 && source.y == 2 && sourceCubie.rightColor == Color.WHITE)
-						|| (source.x == 0 && source.y == 2 && sourceCubie.topColor == Color.WHITE))
+				else if ((source.isInColumnLeft() && source.isInRowBottom() && sourceCubie.leftColor == Color.WHITE)
+						|| (source.isInColumnRight() && source.isInRowBottom() && sourceCubie.bottomColor == Color.WHITE)
+						|| (source.isInColumnRight() && source.isInRowTop() && sourceCubie.rightColor == Color.WHITE)
+						|| (source.isInColumnLeft() && source.isInRowTop() && sourceCubie.topColor == Color.WHITE))
 				{
 					Axis axis = (source.x == source.y) ? Axis.Y : Axis.X;
 					int section = (source.x == source.y) ? source.y : source.x;
-					Direction direction1 = (source.isInColumnLeft()) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
-					Direction direction2 = (source.isInColumnLeft()) ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
+					Direction direction = (source.isInColumnLeft()) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
 					
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
-					addRotationAndApply(new Rotation(axis, section, direction1));
+					addRotationAndApply(new Rotation(axis, section, direction));
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.COUNTER_CLOCKWISE));
-					addRotationAndApply(new Rotation(axis, section, direction2));
+					addRotationAndApply(new Rotation(axis, section, direction.reverse()));
 				}
 				else if (sourceCubie.rearColor == Color.WHITE) {
 					Axis axis = (source.x == source.y) ? Axis.X : Axis.Y;
 					int section = (source.x == source.y) ? source.x : source.y;
-					Direction direction1 = (source.isInRowBottom()) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
-					Direction direction2 = (source.isInRowBottom()) ? Direction.COUNTER_CLOCKWISE: Direction.CLOCKWISE;
+					Direction direction = (source.isInRowBottom()) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
 					
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
-					addRotationAndApply(new Rotation(axis, section, direction1));
+					addRotationAndApply(new Rotation(axis, section, direction));
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.COUNTER_CLOCKWISE));
-					addRotationAndApply(new Rotation(axis, section, direction2));
-					addRotationAndApply(new Rotation(axis, section, direction2));
+					addRotationAndApply(new Rotation(axis, section, direction.reverse()));
+					addRotationAndApply(new Rotation(axis, section, direction.reverse()));
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
-					addRotationAndApply(new Rotation(axis, section, direction1));
-					addRotationAndApply(new Rotation(axis, section, direction1));
+					addRotationAndApply(new Rotation(axis, section, direction));
+					addRotationAndApply(new Rotation(axis, section, direction));
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
-					addRotationAndApply(new Rotation(axis, section, direction2));
+					addRotationAndApply(new Rotation(axis, section, direction.reverse()));
 				}
 			}
-			else if (source.isInFaceRear() && (source.x != cornerPosition.x || source.y != cornerPosition.y)) {
+			else if (source.isInFaceRear() && (source.x != destination.x || source.y != destination.y)) {
 				// corner is in the rear face but is not aligned with the appropriate front corner, align the cornerd in both x and y
-				if (source.x != cornerPosition.x && source.y != cornerPosition.y) {
+				if (source.x != destination.x && source.y != destination.y) {
 					// corners are not aligned in either x or y
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
 				}
-				else if (source.x != cornerPosition.x || source.y != cornerPosition.y) {
+				else if (source.x != destination.x || source.y != destination.y) {
 					// corners are aligned in either x or y
-					Direction direction = ((cornerPosition.isInColumnLeft() && source.isInRowTop()) || (cornerPosition.isInColumnRight() && source.isInRowBottom()))
-							? Direction.COUNTER_CLOCKWISE
-							: Direction.CLOCKWISE;
+					Direction direction = ((destination.isInColumnLeft() && source.isInRowTop()) || (destination.isInColumnRight() && source.isInRowBottom()))
+						? Direction.COUNTER_CLOCKWISE
+						: Direction.CLOCKWISE;
 					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, direction));
 				}
 			}
-			
-			cornerCubie = cube.getCubie(cornerPosition);
 		}
 	}
 	
 	/*********************************************************************************************************************************************************/
 
 	private void solveStep3() {
-		
+		// iterate through each middle edge and solve it
+		List<CubiePosition> positions = getMiddleEdgePositions();
+		for (CubiePosition position : positions) {
+			step3SolveEdge(position);
+		}
 	}
+	
+	private void step3SolveEdge(CubiePosition destination) {
+		List<Color> colors = cube.getVisibleColorsInSolvedState(destination);
+		
+		while (!cube.isPositionSolved(destination)) {
+			CubiePosition source = findCubiePositionWithColors(colors.toArray(new Color[0]));
+			
+			if (isMiddleEdgeSolvable(source)) {
+				// middle edge non-rear color matches the center color of the row/column, solve it
+				step3SolveEdgeFromRearFace(source);
+			}
+			else if (source.isInFaceRear()) {
+				// middle edge is in the rear face but the non-rear color does not match the center color of the row/column, get it into the correct row/column
+				Color color = getMiddleEdgeNonRearColor(source);
+				
+				CubiePosition tmpDestination = null;
+				if (color == Color.GREEN)       tmpDestination = EDGE_REAR_TOP;
+				else if (color == Color.RED)    tmpDestination = EDGE_REAR_LEFT;
+				else if (color == Color.ORANGE) tmpDestination = EDGE_REAR_RIGHT;
+				else if (color == Color.BLUE)   tmpDestination = EDGE_REAR_BOTTOM;
+				
+				if ((source.x == tmpDestination.x) || (source.y == tmpDestination.y)) {
+					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
+					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
+				}
+				else {
+					Direction direction = ((source.isInRowTop() && tmpDestination.isInColumnRight())
+							|| (source.isInColumnRight() && tmpDestination.isInRowBottom())
+							|| (source.isInRowBottom() && tmpDestination.isInColumnLeft())
+							|| (source.isInColumnLeft() && tmpDestination.isInRowTop()))
+						? Direction.CLOCKWISE
+						: Direction.COUNTER_CLOCKWISE;
+					addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, direction));
+				}
+			}
+			else if (source.isInFaceMiddle()) {
+				// middle edge is in the middle face, get it into the rear face
+				Direction zDirection = ((source.isInRowBottom() && source.isInColumnRight()) || (source.isInRowTop() && source.isInColumnLeft()))
+					? Direction.CLOCKWISE
+					: Direction.COUNTER_CLOCKWISE;
+				Axis axis1 = Axis.X;
+				Axis axis2 = Axis.Y;
+				int section1 = source.x;
+				int section2 = source.y;
+				Direction direction1 = source.isInRowTop() ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+				Direction direction2 = source.isInColumnLeft() ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+				moveRearEdgeToMiddle(zDirection, axis1, section1, direction1, axis2, section2, direction2);
+			}
+		}
+	}
+	
+	// solves a middle edge that is in a solvable position in the rear face
+	private void step3SolveEdgeFromRearFace(CubiePosition position) {
+		Cubie cubie = cube.getCubie(position);
+		Color color = getMiddleEdgeNonRearColor(position);
+		
+		Axis axis1 = null, axis2 = null;
+		int section1 = 0, section2 = 0;
+		Direction zDirection = null, direction1 = null, direction2 = null;
+				
+		if (color == Color.GREEN) {
+			zDirection = (cubie.rearColor == Color.RED) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+			axis1 = Axis.X;
+			axis2 = Axis.Y;
+			section1 = (cubie.rearColor == Color.RED) ? RubiksCube.COLUMN_LEFT : RubiksCube.COLUMN_RIGHT;
+			section2 = RubiksCube.ROW_TOP;
+			direction1 = Direction.CLOCKWISE;
+			direction2 = (cubie.rearColor == Color.RED) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+		}
+		else if (color == Color.BLUE) {
+			zDirection = (cubie.rearColor == Color.ORANGE) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+			axis1 = Axis.X;
+			axis2 = Axis.Y;
+			section1 = (cubie.rearColor == Color.ORANGE) ? RubiksCube.COLUMN_RIGHT : RubiksCube.COLUMN_LEFT;
+			section2 = RubiksCube.ROW_BOTTOM;
+			direction1 = Direction.COUNTER_CLOCKWISE;
+			direction2 = (cubie.rearColor == Color.ORANGE) ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
+		}
+		else if (color == Color.RED) {
+			zDirection = (cubie.rearColor == Color.BLUE) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+			axis1 = Axis.Y;
+			axis2 = Axis.X;
+			section1 = (cubie.rearColor == Color.BLUE) ? RubiksCube.ROW_BOTTOM : RubiksCube.ROW_TOP;
+			section2 = RubiksCube.COLUMN_LEFT;
+			direction1 = Direction.CLOCKWISE;
+			direction2 = (cubie.rearColor == Color.BLUE) ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE;
+		}
+		else if (color == Color.ORANGE) {
+			zDirection = (cubie.rearColor == Color.GREEN) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+			axis1 = Axis.Y;
+			axis2 = Axis.X;
+			section1 = (cubie.rearColor == Color.GREEN) ? RubiksCube.ROW_TOP : RubiksCube.ROW_BOTTOM;
+			section2 = RubiksCube.COLUMN_RIGHT;
+			direction1 = Direction.COUNTER_CLOCKWISE;
+			direction2 = (cubie.rearColor == Color.GREEN) ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+		}
+		
+		moveRearEdgeToMiddle(zDirection, axis1, section1, direction1, axis2, section2, direction2);
+	}
+	
+	private void moveRearEdgeToMiddle(Direction zDirection, Axis axis1, int section1, Direction direction1, Axis axis2,  int section2, Direction direction2) {
+		addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, zDirection));
+		addRotationAndApply(new Rotation(axis1, section1, direction1));
+		addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, zDirection.reverse()));
+		addRotationAndApply(new Rotation(axis1, section1, direction1.reverse()));
+		addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, zDirection.reverse()));
+		addRotationAndApply(new Rotation(axis2, section2, direction2));
+		addRotationAndApply(new Rotation(Axis.Z, RubiksCube.FACE_REAR, zDirection));
+		addRotationAndApply(new Rotation(axis2, section2, direction2.reverse()));
+	}
+	
+	// returns true if the middle edge can be solved from the given position
+	private boolean isMiddleEdgeSolvable(CubiePosition position) {
+		if (!position.isInFaceRear()) return false;
+		
+		Color color = getMiddleEdgeNonRearColor(position);
+		
+		Color centerColor = null;
+		if (position.isInRowTop())           centerColor = Cubie.SOLVED_STATE_TOP_COLOR;
+		else if (position.isInRowBottom())   centerColor = Cubie.SOLVED_STATE_BOTTOM_COLOR;
+		else if (position.isInColumnLeft())  centerColor = Cubie.SOLVED_STATE_LEFT_COLOR;
+		else if (position.isInColumnRight()) centerColor = Cubie.SOLVED_STATE_RIGHT_COLOR;
+		
+		return color == centerColor;
+	}
+	
+	// returns the color that is not on the rear face
+	private Color getMiddleEdgeNonRearColor(CubiePosition position) {
+		Cubie cubie = cube.getCubie(position);
+		if (position.isInRowTop()) return cubie.topColor;
+		else if (position.isInRowBottom()) return cubie.bottomColor;
+		else if (position.isInColumnLeft()) return cubie.leftColor;
+		else return cubie.rightColor;
+	}
+	
+	/*********************************************************************************************************************************************************/
 	
 	private void solveStep4() {
 		
 	}
 	
+	/*********************************************************************************************************************************************************/
+	
 	private void solveStep5() {
 		
 	}
+	
+	/*********************************************************************************************************************************************************/
 	
 	private void solveStep6() {
 		
 	}
 	
+	/*********************************************************************************************************************************************************/
+	
 	private void solveStep7() {
 		
 	}
 	
+	/*********************************************************************************************************************************************************/
+	
 	private CubiePosition findCubiePositionWithColors(Color ... colors) {
 		CubiePosition position = null;
 		outerLoop:
-			for (int x=0; x<cube.getSize(); x++) {
-				for (int y=0; y<cube.getSize(); y++) {
-					innerLoop:
-						for (int z=0; z<cube.getSize(); z++) {
-							position = new CubiePosition(x, y, z);
-							List<Color> positionColors = cube.getVisibleColors(position);
-							
-							if (colors.length != positionColors.size()) continue;
-							
-							for (Color color : colors) {
-								if (!positionColors.contains(color)) continue innerLoop;
-							}
-							
-							break outerLoop;
-						}
+		for (int x=0; x<cube.getSize(); x++) {
+			for (int y=0; y<cube.getSize(); y++) {
+				innerLoop:
+				for (int z=0; z<cube.getSize(); z++) {
+					position = new CubiePosition(x, y, z);
+					List<Color> positionColors = cube.getVisibleColors(position);
+					
+					if (colors.length != positionColors.size()) continue;
+					
+					for (Color color : colors) {
+						if (!positionColors.contains(color)) continue innerLoop;
+					}
+					
+					break outerLoop;
 				}
 			}
+		}
 		return position;
 	}
 	
