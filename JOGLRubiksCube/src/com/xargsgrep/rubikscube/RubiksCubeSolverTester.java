@@ -92,16 +92,16 @@ public class RubiksCubeSolverTester {
 		positions.add(RubiksCubeSolver.EDGE_MIDDLE_BOTTOM_RIGHT);
 		positions.add(RubiksCubeSolver.EDGE_MIDDLE_TOP_LEFT);
 		positions.add(RubiksCubeSolver.EDGE_MIDDLE_TOP_RIGHT);
+		positions.add(RubiksCubeSolver.EDGE_REAR_LEFT);
+		positions.add(RubiksCubeSolver.EDGE_REAR_RIGHT);
+		positions.add(RubiksCubeSolver.EDGE_REAR_BOTTOM);
+		positions.add(RubiksCubeSolver.EDGE_REAR_TOP);
 		
 		/*
 		positions.add(RubiksCubeSolver.CORNER_REAR_BOTTOM_LEFT);
 		positions.add(RubiksCubeSolver.CORNER_REAR_BOTTOM_RIGHT);
 		positions.add(RubiksCubeSolver.CORNER_REAR_TOP_LEFT);
 		positions.add(RubiksCubeSolver.CORNER_REAR_TOP_RIGHT);
-		positions.add(RubiksCubeSolver.EDGE_REAR_LEFT);
-		positions.add(RubiksCubeSolver.EDGE_REAR_RIGHT);
-		positions.add(RubiksCubeSolver.EDGE_REAR_BOTTOM);
-		positions.add(RubiksCubeSolver.EDGE_REAR_TOP);
 		*/
 		
 		for (CubiePosition position : positions) {
