@@ -96,13 +96,10 @@ public class RubiksCubeSolverTester {
 		positions.add(LameRubiksCubeSolver.EDGE_REAR_RIGHT);
 		positions.add(LameRubiksCubeSolver.EDGE_REAR_BOTTOM);
 		positions.add(LameRubiksCubeSolver.EDGE_REAR_TOP);
-		
-		/*
 		positions.add(LameRubiksCubeSolver.CORNER_REAR_BOTTOM_LEFT);
 		positions.add(LameRubiksCubeSolver.CORNER_REAR_BOTTOM_RIGHT);
 		positions.add(LameRubiksCubeSolver.CORNER_REAR_TOP_LEFT);
 		positions.add(LameRubiksCubeSolver.CORNER_REAR_TOP_RIGHT);
-		*/
 		
 		for (CubiePosition position : positions) {
 			if (!cube.isPositionSolved(position)) return false;

@@ -19,26 +19,24 @@ import com.xargsgrep.rubikscube.Rotation.Direction;
  */
 public class LameRubiksCubeSolver extends RubiksCubeSolver {
 	
-	public static final CubiePosition CENTER_FRONT  = new CubiePosition(1, 1, 0);
-	public static final CubiePosition CENTER_REAR   = new CubiePosition(1, 1, 2);
-	public static final CubiePosition CENTER_TOP    = new CubiePosition(1, 2, 1);
-	public static final CubiePosition CENTER_BOTTOM = new CubiePosition(1, 0, 1);
-	public static final CubiePosition CENTER_LEFT   = new CubiePosition(0, 1, 1);
-	public static final CubiePosition CENTER_RIGHT  = new CubiePosition(2, 1, 1);
-	
-	public static final CubiePosition EDGE_FRONT_LEFT    = new CubiePosition(0, 1, 0);
-	public static final CubiePosition EDGE_FRONT_RIGHT   = new CubiePosition(2, 1, 0);
-	public static final CubiePosition EDGE_FRONT_TOP     = new CubiePosition(1, 2, 0);
-	public static final CubiePosition EDGE_FRONT_BOTTOM  = new CubiePosition(1, 0, 0);
-	public static final CubiePosition EDGE_MIDDLE_TOP_LEFT     = new CubiePosition(0, 2, 1);
-	public static final CubiePosition EDGE_MIDDLE_BOTTOM_LEFT  = new CubiePosition(0, 0, 1);
-	public static final CubiePosition EDGE_MIDDLE_TOP_RIGHT    = new CubiePosition(2, 2, 1);
-	public static final CubiePosition EDGE_MIDDLE_BOTTOM_RIGHT = new CubiePosition(2, 0, 1);
-	public static final CubiePosition EDGE_REAR_LEFT     = new CubiePosition(0, 1, 2);
-	public static final CubiePosition EDGE_REAR_RIGHT    = new CubiePosition(2, 1, 2);
-	public static final CubiePosition EDGE_REAR_TOP      = new CubiePosition(1, 2, 2);
-	public static final CubiePosition EDGE_REAR_BOTTOM   = new CubiePosition(1, 0, 2);
-	
+	public static final CubiePosition CENTER_FRONT              = new CubiePosition(1, 1, 0);
+	public static final CubiePosition CENTER_REAR               = new CubiePosition(1, 1, 2);
+	public static final CubiePosition CENTER_TOP                = new CubiePosition(1, 2, 1);
+	public static final CubiePosition CENTER_BOTTOM             = new CubiePosition(1, 0, 1);
+	public static final CubiePosition CENTER_LEFT               = new CubiePosition(0, 1, 1);
+	public static final CubiePosition CENTER_RIGHT              = new CubiePosition(2, 1, 1);
+	public static final CubiePosition EDGE_FRONT_LEFT           = new CubiePosition(0, 1, 0);
+	public static final CubiePosition EDGE_FRONT_RIGHT          = new CubiePosition(2, 1, 0);
+	public static final CubiePosition EDGE_FRONT_TOP            = new CubiePosition(1, 2, 0);
+	public static final CubiePosition EDGE_FRONT_BOTTOM         = new CubiePosition(1, 0, 0);
+	public static final CubiePosition EDGE_MIDDLE_TOP_LEFT      = new CubiePosition(0, 2, 1);
+	public static final CubiePosition EDGE_MIDDLE_BOTTOM_LEFT   = new CubiePosition(0, 0, 1);
+	public static final CubiePosition EDGE_MIDDLE_TOP_RIGHT     = new CubiePosition(2, 2, 1);
+	public static final CubiePosition EDGE_MIDDLE_BOTTOM_RIGHT  = new CubiePosition(2, 0, 1);
+	public static final CubiePosition EDGE_REAR_LEFT            = new CubiePosition(0, 1, 2);
+	public static final CubiePosition EDGE_REAR_RIGHT           = new CubiePosition(2, 1, 2);
+	public static final CubiePosition EDGE_REAR_TOP             = new CubiePosition(1, 2, 2);
+	public static final CubiePosition EDGE_REAR_BOTTOM          = new CubiePosition(1, 0, 2);
 	public static final CubiePosition CORNER_FRONT_TOP_LEFT     = new CubiePosition(0, 2, 0);
 	public static final CubiePosition CORNER_FRONT_BOTTOM_LEFT  = new CubiePosition(0, 0, 0);
 	public static final CubiePosition CORNER_FRONT_TOP_RIGHT    = new CubiePosition(2, 2, 0);
@@ -507,31 +505,27 @@ public class LameRubiksCubeSolver extends RubiksCubeSolver {
 		while(!isStep6Solved()) {
 			Axis axis = null;
 			int section1 = 0, section2 = 0;
-			Direction direction = null;
+			Direction direction = position.isInRowTop() ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
 			
 			if (position.equals(CORNER_REAR_BOTTOM_LEFT)) {
 				axis = Axis.X;
 				section1 = RubiksCube.COLUMN_RIGHT;
 				section2 = RubiksCube.COLUMN_LEFT;
-				direction = Direction.COUNTER_CLOCKWISE;
 			}
 			else if (position.equals(CORNER_REAR_BOTTOM_RIGHT)) {
 				axis = Axis.Y;
 				section1 = RubiksCube.ROW_TOP;
 				section2 = RubiksCube.ROW_BOTTOM;
-				direction = Direction.COUNTER_CLOCKWISE;
 			}
 			else if (position.equals(CORNER_REAR_TOP_LEFT)) {
 				axis = Axis.Y;
 				section1 = RubiksCube.ROW_BOTTOM;
 				section2 = RubiksCube.ROW_TOP;
-				direction = Direction.CLOCKWISE;
 			}
 			else if (position.equals(CORNER_REAR_TOP_RIGHT)) {
 				axis = Axis.X;
 				section1 = RubiksCube.COLUMN_LEFT;
 				section2 = RubiksCube.COLUMN_RIGHT;
-				direction = Direction.CLOCKWISE;
 			}
 			
 			step6RotateRearCorners(axis, section1, section2, direction);
@@ -570,19 +564,66 @@ public class LameRubiksCubeSolver extends RubiksCubeSolver {
 	/*********************************************************************************************************************************************************/
 	
 	private void solveStep7() {
-//		while (!isStep7Solved()) { }
-	}
-	
-	private boolean isStep7Solved() {
-		List<CubiePosition> positions = getRearCornerPositions();
+		// order of positions matters here
+		List<CubiePosition> positions = new ArrayList<CubiePosition>();
+		positions.add(CORNER_REAR_TOP_RIGHT);
+		positions.add(CORNER_REAR_BOTTOM_RIGHT);
+		positions.add(CORNER_REAR_BOTTOM_LEFT);
+		positions.add(CORNER_REAR_TOP_LEFT);
 		
 		for (CubiePosition position : positions) {
-			if (!cube.isPositionSolved(position)) return false;
+			while (!cube.isPositionSolved(position)) {
+				step7RotateRearCorner(position);
+			}
 		}
-		
-		return true;
 	}
 	
+	private void step7RotateRearCorner(CubiePosition position) {
+		Axis axis = null;
+		int section1 = 0, section2 = 0;
+		Direction direction = position.isInRowBottom() ? Direction.CLOCKWISE : Direction.COUNTER_CLOCKWISE;
+			
+		if (position.equals(CORNER_REAR_TOP_RIGHT)) {
+			axis = Axis.X;
+			section1 = RubiksCube.COLUMN_LEFT;
+			section2 = RubiksCube.COLUMN_RIGHT;
+		}
+		else if (position.equals(CORNER_REAR_BOTTOM_RIGHT)) {
+			axis = Axis.Y;
+			section1 = RubiksCube.ROW_TOP;
+			section2 = RubiksCube.ROW_BOTTOM;
+		}
+		else if (position.equals(CORNER_REAR_BOTTOM_LEFT)) {
+			axis = Axis.X;
+			section1 = RubiksCube.COLUMN_RIGHT;
+			section2 = RubiksCube.COLUMN_LEFT;
+		}
+		else if (position.equals(CORNER_REAR_TOP_LEFT)) {
+			axis = Axis.Y;
+			section1 = RubiksCube.ROW_BOTTOM;
+			section2 = RubiksCube.ROW_TOP;
+		}
+		
+		addAndApplyRotation(new Rotation(axis, section1, direction));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.COUNTER_CLOCKWISE));
+		addAndApplyRotation(new Rotation(axis, section1, direction.reverse()));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.COUNTER_CLOCKWISE));
+		
+		addAndApplyRotation(new Rotation(axis, section1, direction));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
+		addAndApplyRotation(new Rotation(axis, section1, direction.reverse()));
+		
+		addAndApplyRotation(new Rotation(axis, section2, direction));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
+		addAndApplyRotation(new Rotation(axis, section2, direction.reverse()));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
+		
+		addAndApplyRotation(new Rotation(axis, section2, direction));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
+		addAndApplyRotation(new Rotation(axis, section2, direction.reverse()));
+	}
 	
 	/*********************************************************************************************************************************************************/
 	
