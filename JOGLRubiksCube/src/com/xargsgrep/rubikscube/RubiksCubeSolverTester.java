@@ -55,7 +55,7 @@ public class RubiksCubeSolverTester {
 	}
 	
 	private static void scrambleCube(RubiksCube cube, int numMoves) {
-		List<Rotation> rotations = new ArrayList<Rotation>();
+		List<Rotation> rotations = new ArrayList<Rotation>(numMoves);
 		for (int i=0; i<numMoves; i++) {
 			int section = new Random().nextInt(cube.getSize());
 			Axis axis = Axis.values()[new Random().nextInt(Axis.values().length)];

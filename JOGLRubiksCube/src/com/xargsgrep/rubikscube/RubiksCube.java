@@ -57,16 +57,31 @@ public class RubiksCube {
 		return state[x][y][z];
 	}
 	
+	// returns true if the position is in the correct location and orientation
 	public boolean isPositionSolved(CubiePosition position) {
 		Cubie cubie = getCubie(position);
 		
 		int lastIdx = size-1;
-		if (position.x == 0 && cubie.leftColor != Color.RED)           return false;
-		if (position.x == lastIdx && cubie.rightColor != Color.ORANGE) return false;
-		if (position.y == 0 && cubie.bottomColor != Color.BLUE)        return false;
-		if (position.y == lastIdx && cubie.topColor != Color.GREEN)    return false;
-		if (position.z == 0 && cubie.frontColor != Color.WHITE)        return false;
-		if (position.z == lastIdx && cubie.rearColor != Color.YELLOW)  return false;
+		if (position.x == 0 && cubie.leftColor != Cubie.SOLVED_STATE_LEFT_COLOR)         return false;
+		if (position.x == lastIdx && cubie.rightColor != Cubie.SOLVED_STATE_RIGHT_COLOR) return false;
+		if (position.y == 0 && cubie.bottomColor != Cubie.SOLVED_STATE_BOTTOM_COLOR)     return false;
+		if (position.y == lastIdx && cubie.topColor != Cubie.SOLVED_STATE_TOP_COLOR)     return false;
+		if (position.z == 0 && cubie.frontColor != Cubie.SOLVED_STATE_FRONT_COLOR)       return false;
+		if (position.z == lastIdx && cubie.rearColor != Cubie.SOLVED_STATE_REAR_COLOR)   return false;
+		return true;
+	}
+	
+	// returns true if the position is in the correct location
+	public boolean isPositionCorrect(CubiePosition position) {
+		List<Color> colors = getVisibleColors(position);
+		List<Color> solvedColors = getVisibleColorsInSolvedState(position);
+		
+		if (colors.size() != solvedColors.size()) return false;
+		
+		for (Color color : solvedColors) {
+			if (!colors.contains(color)) return false;
+		}
+		
 		return true;
 	}
 	

@@ -490,13 +490,6 @@ public class RubiksCubeSolver {
 		}
 	}
 	
-	/*
-	private boolean isStep5Solved() {
-		return (!cube.isPositionSolved(EDGE_REAR_TOP) || !cube.isPositionSolved(EDGE_REAR_BOTTOM) 
-				|| !cube.isPositionSolved(EDGE_REAR_LEFT) || !cube.isPositionSolved(EDGE_REAR_RIGHT));
-	}
-	*/
-	
 	private boolean isStep5Solved() {
 		List<CubiePosition> positions = getRearEdgePositions();
 		
@@ -510,14 +503,91 @@ public class RubiksCubeSolver {
 	/*********************************************************************************************************************************************************/
 	
 	private void solveStep6() {
+		CubiePosition position = findRearCornerInCorrectPosition();
+		while (position == null) {
+			step6RotateRearCorners(Axis.X, RubiksCube.COLUMN_RIGHT, RubiksCube.COLUMN_LEFT, Direction.COUNTER_CLOCKWISE);
+			position = findRearCornerInCorrectPosition();
+		}
 		
+		while(!isStep6Solved()) {
+			Axis axis = null;
+			int section1 = 0, section2 = 0;
+			Direction direction = null;
+			
+			if (position.equals(CORNER_REAR_BOTTOM_LEFT)) {
+				axis = Axis.X;
+				section1 = RubiksCube.COLUMN_RIGHT;
+				section2 = RubiksCube.COLUMN_LEFT;
+				direction = Direction.COUNTER_CLOCKWISE;
+			}
+			else if (position.equals(CORNER_REAR_BOTTOM_RIGHT)) {
+				axis = Axis.Y;
+				section1 = RubiksCube.ROW_TOP;
+				section2 = RubiksCube.ROW_BOTTOM;
+				direction = Direction.COUNTER_CLOCKWISE;
+			}
+			else if (position.equals(CORNER_REAR_TOP_LEFT)) {
+				axis = Axis.Y;
+				section1 = RubiksCube.ROW_BOTTOM;
+				section2 = RubiksCube.ROW_TOP;
+				direction = Direction.CLOCKWISE;
+			}
+			else if (position.equals(CORNER_REAR_TOP_RIGHT)) {
+				axis = Axis.X;
+				section1 = RubiksCube.COLUMN_LEFT;
+				section2 = RubiksCube.COLUMN_RIGHT;
+				direction = Direction.CLOCKWISE;
+			}
+			
+			step6RotateRearCorners(axis, section1, section2, direction);
+		}
+	}
+	
+	private void step6RotateRearCorners(Axis axis, int section1, int section2, Direction direction) {
+		addAndApplyRotation(new Rotation(axis, section1, direction));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.COUNTER_CLOCKWISE));
+		addAndApplyRotation(new Rotation(axis, section2, direction));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
+		addAndApplyRotation(new Rotation(axis, section1, direction.reverse()));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.COUNTER_CLOCKWISE));
+		addAndApplyRotation(new Rotation(axis, section2, direction.reverse()));
+		addAndApplyRotation(new Rotation(Axis.Z, RubiksCube.FACE_REAR, Direction.CLOCKWISE));
+	}
+	
+	private CubiePosition findRearCornerInCorrectPosition() {
+		List<CubiePosition> positions = getRearCornerPositions();
+		for (CubiePosition position : positions) {
+			if (cube.isPositionCorrect(position)) return position;
+		}
+		return null;
+	}
+	
+	private boolean isStep6Solved() {
+		List<CubiePosition> positions = getRearCornerPositions();
+		
+		for (CubiePosition position : positions) {
+			if (!cube.isPositionCorrect(position)) return false;
+		}
+		
+		return true;
 	}
 	
 	/*********************************************************************************************************************************************************/
 	
 	private void solveStep7() {
-		
+//		while (!isStep7Solved()) { }
 	}
+	
+	private boolean isStep7Solved() {
+		List<CubiePosition> positions = getRearCornerPositions();
+		
+		for (CubiePosition position : positions) {
+			if (!cube.isPositionSolved(position)) return false;
+		}
+		
+		return true;
+	}
+	
 	
 	/*********************************************************************************************************************************************************/
 	
@@ -563,6 +633,15 @@ public class RubiksCubeSolver {
 		return edges;
 	}
 	
+	private List<CubiePosition> getFrontCornerPositions() {
+		List<CubiePosition> corners = new ArrayList<CubiePosition>();
+		corners.add(CORNER_FRONT_BOTTOM_LEFT);
+		corners.add(CORNER_FRONT_BOTTOM_RIGHT);
+		corners.add(CORNER_FRONT_TOP_LEFT);
+		corners.add(CORNER_FRONT_TOP_RIGHT);
+		return corners;
+	}
+	
 	private List<CubiePosition> getMiddleEdgePositions() {
 		List<CubiePosition> edges = new ArrayList<CubiePosition>();
 		edges.add(EDGE_MIDDLE_TOP_RIGHT);
@@ -579,15 +658,6 @@ public class RubiksCubeSolver {
 		edges.add(EDGE_REAR_LEFT);
 		edges.add(EDGE_REAR_RIGHT);
 		return edges;
-	}
-	
-	private List<CubiePosition> getFrontCornerPositions() {
-		List<CubiePosition> corners = new ArrayList<CubiePosition>();
-		corners.add(CORNER_FRONT_BOTTOM_LEFT);
-		corners.add(CORNER_FRONT_BOTTOM_RIGHT);
-		corners.add(CORNER_FRONT_TOP_LEFT);
-		corners.add(CORNER_FRONT_TOP_RIGHT);
-		return corners;
 	}
 	
 	private List<CubiePosition> getRearCornerPositions() {
