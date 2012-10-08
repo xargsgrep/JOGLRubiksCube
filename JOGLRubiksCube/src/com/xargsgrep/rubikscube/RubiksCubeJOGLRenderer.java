@@ -298,7 +298,7 @@ public class RubiksCubeJOGLRenderer extends GLCanvas implements GLEventListener,
 	
 	private void toggleSolveCube() {
 		if (solutionAnimatorThread == null || !solutionAnimatorThread.isAlive()) {
-			RubiksCubeSolver solver = new RubiksCubeSolver(rubiksCube.getCopy());
+			RubiksCubeSolver solver = new LameRubiksCubeSolver(rubiksCube.getCopy());
 			final List<Rotation> rotations = solver.getSolution();
 			System.out.println("Found solution with " + rotations.size() + " moves");
 		

@@ -30,7 +30,7 @@ public class RubiksCubeSolverTester {
 			
 			scrambleCube(cube, numScrambleMoves);
 			
-			RubiksCubeSolver solver = new RubiksCubeSolver(cube.getCopy());
+			RubiksCubeSolver solver = new LameRubiksCubeSolver(cube.getCopy());
 			List<Rotation> solution = solver.getSolution();
 			invalidSolutions += isValidSolution(cube, solution) ? 0 : 1;
 			
@@ -74,34 +74,34 @@ public class RubiksCubeSolverTester {
 		}
 		
 		List<CubiePosition> positions = new ArrayList<CubiePosition>();
-		positions.add(RubiksCubeSolver.CENTER_FRONT);
-		positions.add(RubiksCubeSolver.CENTER_REAR);
-		positions.add(RubiksCubeSolver.CENTER_TOP);
-		positions.add(RubiksCubeSolver.CENTER_BOTTOM);
-		positions.add(RubiksCubeSolver.CENTER_LEFT);
-		positions.add(RubiksCubeSolver.CENTER_RIGHT);
-		positions.add(RubiksCubeSolver.CORNER_FRONT_BOTTOM_LEFT);
-		positions.add(RubiksCubeSolver.CORNER_FRONT_BOTTOM_RIGHT);
-		positions.add(RubiksCubeSolver.CORNER_FRONT_TOP_LEFT);
-		positions.add(RubiksCubeSolver.CORNER_FRONT_TOP_RIGHT);
-		positions.add(RubiksCubeSolver.EDGE_FRONT_LEFT);
-		positions.add(RubiksCubeSolver.EDGE_FRONT_RIGHT);
-		positions.add(RubiksCubeSolver.EDGE_FRONT_BOTTOM);
-		positions.add(RubiksCubeSolver.EDGE_FRONT_TOP);
-		positions.add(RubiksCubeSolver.EDGE_MIDDLE_BOTTOM_LEFT);
-		positions.add(RubiksCubeSolver.EDGE_MIDDLE_BOTTOM_RIGHT);
-		positions.add(RubiksCubeSolver.EDGE_MIDDLE_TOP_LEFT);
-		positions.add(RubiksCubeSolver.EDGE_MIDDLE_TOP_RIGHT);
-		positions.add(RubiksCubeSolver.EDGE_REAR_LEFT);
-		positions.add(RubiksCubeSolver.EDGE_REAR_RIGHT);
-		positions.add(RubiksCubeSolver.EDGE_REAR_BOTTOM);
-		positions.add(RubiksCubeSolver.EDGE_REAR_TOP);
+		positions.add(LameRubiksCubeSolver.CENTER_FRONT);
+		positions.add(LameRubiksCubeSolver.CENTER_REAR);
+		positions.add(LameRubiksCubeSolver.CENTER_TOP);
+		positions.add(LameRubiksCubeSolver.CENTER_BOTTOM);
+		positions.add(LameRubiksCubeSolver.CENTER_LEFT);
+		positions.add(LameRubiksCubeSolver.CENTER_RIGHT);
+		positions.add(LameRubiksCubeSolver.CORNER_FRONT_BOTTOM_LEFT);
+		positions.add(LameRubiksCubeSolver.CORNER_FRONT_BOTTOM_RIGHT);
+		positions.add(LameRubiksCubeSolver.CORNER_FRONT_TOP_LEFT);
+		positions.add(LameRubiksCubeSolver.CORNER_FRONT_TOP_RIGHT);
+		positions.add(LameRubiksCubeSolver.EDGE_FRONT_LEFT);
+		positions.add(LameRubiksCubeSolver.EDGE_FRONT_RIGHT);
+		positions.add(LameRubiksCubeSolver.EDGE_FRONT_BOTTOM);
+		positions.add(LameRubiksCubeSolver.EDGE_FRONT_TOP);
+		positions.add(LameRubiksCubeSolver.EDGE_MIDDLE_BOTTOM_LEFT);
+		positions.add(LameRubiksCubeSolver.EDGE_MIDDLE_BOTTOM_RIGHT);
+		positions.add(LameRubiksCubeSolver.EDGE_MIDDLE_TOP_LEFT);
+		positions.add(LameRubiksCubeSolver.EDGE_MIDDLE_TOP_RIGHT);
+		positions.add(LameRubiksCubeSolver.EDGE_REAR_LEFT);
+		positions.add(LameRubiksCubeSolver.EDGE_REAR_RIGHT);
+		positions.add(LameRubiksCubeSolver.EDGE_REAR_BOTTOM);
+		positions.add(LameRubiksCubeSolver.EDGE_REAR_TOP);
 		
 		/*
-		positions.add(RubiksCubeSolver.CORNER_REAR_BOTTOM_LEFT);
-		positions.add(RubiksCubeSolver.CORNER_REAR_BOTTOM_RIGHT);
-		positions.add(RubiksCubeSolver.CORNER_REAR_TOP_LEFT);
-		positions.add(RubiksCubeSolver.CORNER_REAR_TOP_RIGHT);
+		positions.add(LameRubiksCubeSolver.CORNER_REAR_BOTTOM_LEFT);
+		positions.add(LameRubiksCubeSolver.CORNER_REAR_BOTTOM_RIGHT);
+		positions.add(LameRubiksCubeSolver.CORNER_REAR_TOP_LEFT);
+		positions.add(LameRubiksCubeSolver.CORNER_REAR_TOP_RIGHT);
 		*/
 		
 		for (CubiePosition position : positions) {
