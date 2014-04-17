@@ -1,0 +1,13 @@
+apply plugin: 'java'
+
+sourceSets.main.java.srcDir 'src'
+
+dependencies {
+    compile files('../jogamp-all-platforms/jar/jogl-all.jar')
+    compile files('../jogamp-all-platforms/jar/gluegen-rt.jar')
+}
+
+task run(type: JavaExec) {
+    main = 'com.xargsgrep.rubikscube.RubiksCubeJOGLRenderer'
+    classpath = sourceSets.main.runtimeClasspath
+}
